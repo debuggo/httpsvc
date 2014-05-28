@@ -1,0 +1,208 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(中华人民共和国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "斯普林"
+            VALUE "FileDescription", "httpsvc.exe"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "httpsvc.exe"
+            VALUE "LegalCopyright", "版权所有 (C) 1996-2013 斯普林"
+            VALUE "OriginalFilename", "httpsvc.exe"
+            VALUE "ProductName", "斯普林名智界面管理服务"
+            VALUE "ProductVersion", "1, 0, 0, 0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON                ICON                    "Icon.ico"
+IDI_Close               ICON                    "Close.ico"
+IDI_MiniIcon            ICON                    "MiniIcon.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// JPG
+//
+
+IDJ_Title               JPG                     "Title.jpg"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 413
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 241
+    END
+
+    IDD_DLG_MAIN, DIALOG
+    BEGIN
+        TOPMARGIN, 7
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 433, 259
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "名智2013"
+FONT 9, "宋体", 400, 0, 0x86
+BEGIN
+    PUSHBUTTON      "启动",IDC_BUTTON1,365,76,56,18
+    PUSHBUTTON      "停止",IDC_BUTTON2,365,102,56,18
+    PUSHBUTTON      "重新启动",IDC_BUTTON3,365,128,56,18
+    PUSHBUTTON      "刷新",IDC_BUTTON4,365,154,56,18
+    PUSHBUTTON      "全部启动",IDC_BUTTON5,365,180,56,18
+    PUSHBUTTON      "全部停止",IDC_BUTTON6,365,206,56,18
+    PUSHBUTTON      "关闭窗口",IDC_BUTTON7,365,231,56,18
+    LTEXT           "静态",IDC_Title,0,0,433,72
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,0,94,352,164
+    LTEXT           "静态",IDC_Name,0,73,96,21
+    LTEXT           "静态",IDC_Description,90,73,203,21
+    LTEXT           "静态",IDC_Status,287,73,64,21
+END
+
+IDD_DLG_MAIN DIALOGEX 0, 0, 422, 261
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "名智2013"
+FONT 9, "宋体", 400, 0, 0x86
+BEGIN
+    PUSHBUTTON      "启动",IDC_BTN_STARTSERVICE,357,74,56,18
+    PUSHBUTTON      "停止",IDC_BTN_STOPSERVICE,357,100,56,18
+    PUSHBUTTON      "重新启动",IDC_BTN_RESTSTARTSERVICE,357,126,56,18
+    PUSHBUTTON      "刷新",IDC_BTN_REFRESH,357,152,56,18
+    PUSHBUTTON      "全部启动",IDC_BTN_STARTALLSRTVICE,357,178,56,18
+    PUSHBUTTON      "全部停止",IDC_BTN_STOPALLSERVICE,357,204,56,18
+    PUSHBUTTON      "关闭窗口",IDC_BUTTON7,357,229,56,18
+    LTEXT           "静态",IDC_Title,0,0,422,72
+    CONTROL         "",IDC_LIST_SERVICE,"SysListView32",LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,0,94,352,153
+    LTEXT           "静态",IDC_SERVICE_NAME,0,73,96,21
+    LTEXT           "静态",IDC_SERVICE_DESCRIPTION,90,73,203,21
+    LTEXT           "静态",IDC_SERVICE_STATUS,287,73,64,21
+    LTEXT           "提示:",IDC_MESSAGE,1,250,411,10,SS_WORDELLIPSIS
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+1                       RT_MANIFEST             "VistaStyle.manifest"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ServiceName         "斯普林名智界面管理服务"
+    IDS_BrandsName          "名智2013"
+END
+
+#endif    // 中文(中华人民共和国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
