@@ -10,10 +10,25 @@
 #include "IniFile.h"
 #include <Winsvc.h>
 #include <Gdiplus.h> 
-
+#include <vector>
+using namespace std;
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib,"Gdiplus.lib")
 using namespace Gdiplus;
+
+
+typedef	struct	_tagBubbleData
+{
+	int		nFlags;// 控制位：10:（删除托盘并退出程序）1（气泡提示）
+	TCHAR	wszMessage[128];
+	TCHAR	wszTitle[64];
+}BUBBLEDATA;
+typedef struct _tagSocketInMsg
+{
+	TCHAR szTime[MAXBYTE];
+	TCHAR szMsgText[MAXBYTE];
+	TCHAR szTitle[MAXBYTE];
+}SOCKETINMSG, *PSOCKETINMSG;
 class CMainDialog
 {
 enum MAINDLGERR
@@ -76,17 +91,26 @@ public:
 	BOOL BtnStopAllService(HWND hWnd);//停止全部按钮被按下
 	BOOL BtnRestStatrService(HWND hWnd);//重启服务按钮被按下
 	BOOL BtnRefreshService(HWND hWnd);	//刷新服务状态按钮被按下
+	BOOL BtnHideWindow(HWND hWnd);	//隐藏窗口
+	BOOL AddMsgToMsgWnd(HWND hMsgWnd);	//向消息窗口添加消息
 	/************************************************************************/
 	/* 变量                                                                 */
 	/************************************************************************/
 	BOOL m_bWindowIsShow;	//窗口是否显示
+	BOOL m_bMsgWindowsIsShow;	//消息窗口是否显示
 	HMENU m_hMenu;	//托盘菜单
 	HWND m_hWnd;	//主窗口句柄
+	HWND m_hMsgWnd;	//消息窗口句柄
 	CString m_strPort;//端口
 	CString m_strAppPath;	//程序路径
 	GdiplusStartupInput		m_gdiPlusInPut;
 	ULONG_PTR				m_gdiPlusToken;
 	HINSTANCE m_hInstance;	//程序实例句柄
+	SOCKET m_Socket;	//Socket对象
+	BOOL m_bIsFirstIcon;//控制托盘图标闪动
+	BOOL m_bIsHasMsg;	//消息到达
+	NOTIFYICONDATA m_nid;	//托盘结构
+	vector<PSOCKETINMSG> m_vctMsg;	//消息容器
 private:
 	CMainDialog(void);
 	CMainDialog(CMainDialog const&);
@@ -116,9 +140,8 @@ private:
 	BOOL ServiceStartByName(HWND hWnd, int nItemIndex, TCHAR *szText);//根据名字启动
 	inline TCHAR* GetServicePathForName(TCHAR *szServiceName, TCHAR *szServicePath);//根据服务名获取服务路径
 	BOOL SetListItemText(HWND hWnd, int nItemIndex, TCHAR *szText, int nSubItem = 2);//设置列表文本
+	
 	static CMainDialog* m_pTheSinleton;
 	HANDLE m_hMutex;	//互斥体句柄
-	NOTIFYICONDATA m_nid;	//托盘结构
 	CIniFile m_IniFile;	//Ini对象
-	SOCKET m_Socket;	//Socket对象
 };

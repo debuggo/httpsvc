@@ -1,6 +1,7 @@
 //#include "MainDialog.h"
 //#include "mylog.h"
 //#include "AppMain.h"
+#include <WindowsX.h>
 #include "FQ_Std.h"
 #include "MainDialog.h"
 #include "AppMain.h"
@@ -27,6 +28,9 @@
 #define SVC_NAME_SPLTOOLSVC L"SPL_TOOLSVC"
 #define SVC_NAME_SPLBTSVC L"SPL_BTSVC"
 
+#define RECVMAXBUFFER 1024
+
+#define ID_NOTIFYMSG_IN 1
 CMainDialog* CMainDialog::m_pTheSinleton = new CMainDialog();
 
 
@@ -43,7 +47,34 @@ CMainDialog::~CMainDialog(void)
 	}
 	WSACleanup();
 }
-
+VOID CALLBACK TimeShellNotifyIcon(HWND hWnd, UINT uMsg, UINT uTimerID, DWORD dwTime);
+INT_PTR CALLBACK MsgWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	CMainDialog *pMainDlg = CMainDialog::Instance();
+	switch(msg)
+	{
+	case WM_COMMAND:
+		{
+			WORD wmMenuID = LOWORD(wParam);
+			WORD wmEvent = HIWORD(wParam);
+			switch(wmMenuID)
+			{
+			case IDC_BTN_EXIT:	//隐藏窗口
+				{
+					ShowWindow(hWnd, SW_HIDE);
+					pMainDlg->m_bMsgWindowsIsShow = FALSE;
+				}	
+				break;
+			default:
+				return 0;
+			}
+		}
+		break;
+	default:
+		return 0;
+	}
+	return 1;
+}
 INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	CMainDialog* pMainDlg = CMainDialog::Instance();
@@ -76,8 +107,26 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 					break;
 				case WM_LBUTTONDBLCLK:	//托盘_左键双击,无消息时启动URL
 					{
-						CString strUrl = URL_CONTROL + pMainDlg->m_strPort;
-						pMainDlg->OpenUrl(strUrl);
+						if (pMainDlg->m_bIsHasMsg)
+						{
+							KillTimer(hWnd, ID_NOTIFYMSG_IN);
+							pMainDlg->m_bIsHasMsg = FALSE;
+							//显示消息窗口
+							if (pMainDlg->m_bMsgWindowsIsShow == FALSE)
+							{
+								ShowWindow(pMainDlg->m_hMsgWnd, SW_SHOW);
+								pMainDlg->m_bMsgWindowsIsShow = TRUE;
+							}
+							//更新消息
+							pMainDlg->AddMsgToMsgWnd(hWnd);
+							pMainDlg->m_nid.hIcon =  LoadIcon(pMainDlg->m_hInstance, MAKEINTRESOURCE(IDI_MiniIcon));	//加载图标
+							Shell_NotifyIcon(NIM_MODIFY, &(pMainDlg->m_nid));
+						}
+						else
+						{
+							CString strUrl = URL_CONTROL + pMainDlg->m_strPort;
+							pMainDlg->OpenUrl(strUrl);
+						}
 					}
 					break;
 				default:
@@ -157,6 +206,11 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			case IDC_BTN_STOPALLSERVICE:	//停止所有服务
 				{
 					pMainDlg->BtnStopAllService(hWnd);
+				}
+				break;
+			case IDC_BTN_HIDEWINDOW://隐藏窗口
+				{
+					pMainDlg->BtnHideWindow(hWnd);
 				}
 				break;
 			default:
@@ -276,6 +330,67 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			EndPaint(hWnd,&ps);
 		}
 		break;
+	case WM_SOCKET_IN:	//接收到BT或MZD的消息
+		{
+			if (WSAGETSELECTERROR(lParam))	//如果是错误消息
+			{
+				closesocket(wParam);
+				break;
+			}
+			switch(WSAGETSELECTEVENT(lParam))	//获取消息
+			{
+			case FD_READ:
+				{
+					char RecvBuffer[RECVMAXBUFFER] = { 0 };//消息
+					int nRecv = recvfrom(pMainDlg->m_Socket, RecvBuffer, RECVMAXBUFFER, 0, NULL, NULL);
+					if (nRecv == SOCKET_ERROR)//获取消息失败
+					{
+						break;
+					}
+					BUBBLEDATA *pBubble = (BUBBLEDATA *)RecvBuffer;
+					switch(pBubble->nFlags)
+					{
+					case 1://消息到达
+						{
+							//将消息更新至容器
+							PSOCKETINMSG inMsg = new SOCKETINMSG;
+							CTime time = CTime::GetCurrentTime();
+							CString strBuf = time.Format(_T("%Y年%m月%d日 %H:%M:%S"));
+							//TCHAR strBuf[MAXBYTE] = time.Format(_T("%Y年%m月%D日 %H:%M:%S"));
+							_tcscpy(inMsg->szTime, strBuf.GetBuffer());
+							strBuf.ReleaseBuffer();
+							_tcscpy(inMsg->szMsgText, pBubble->wszMessage);
+							_tcscpy(inMsg->szTitle, pBubble->wszTitle);
+							pMainDlg->m_vctMsg.push_back(inMsg);
+							//如果消息记录窗口被打开
+							if (pMainDlg->m_bMsgWindowsIsShow == TRUE)
+							{
+								//不提示闪动_直接更新至消息记录窗口
+								pMainDlg->AddMsgToMsgWnd(hWnd);
+							}
+							else
+							{
+								//提示消息到达_托盘图标闪动
+								SetTimer(hWnd, ID_NOTIFYMSG_IN, 400, TimeShellNotifyIcon);
+								pMainDlg->m_bIsHasMsg = TRUE;
+							}
+							
+						}
+						break;
+					case 10:	//删除托盘并退出
+						{
+							Shell_NotifyIcon(NIM_DELETE, &pMainDlg->m_nid);
+							ExitProcess(0);
+						}
+						break;
+					default:
+						break;
+					}
+				}
+				break;
+			}
+		}
+		break;
 	default:
 		return 0;	//由系统处理
 		break;
@@ -305,14 +420,22 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 	}
 	
 	//创建窗口
-	m_hWnd = CreateDialogW(hInstance, MAKEINTRESOURCEW(IDD_DLG_MAIN), NULL, WindowProc);
+	m_hWnd = CreateDialog(hInstance, MAKEINTRESOURCEW(IDD_DLG_MAIN), NULL, WindowProc);
 	if (m_hWnd == NULL)
 	{
 		WRITE_LOG(LOG_LEVEL_FATAL, _T("创建窗体失败! ErrorCode : 0x%08X"), GetLastError());
 		CloseHandle(m_hMutex);
 		ExitProcess(0);
 	}
-
+	//创建消息窗口
+	m_hMsgWnd = CreateDialog(hInstance, MAKEINTRESOURCEW(IDD_DLG_MSG), NULL, MsgWndProc);
+	if (m_hMsgWnd == NULL)
+	{
+		WRITE_LOG(LOG_LEVEL_FATAL, _T("创建窗体失败! ErrorCode : 0x%08X"), GetLastError());
+		CloseHandle(m_hMutex);
+		ExitProcess(0);
+	}
+	m_bMsgWindowsIsShow = FALSE;
 	//显示窗口
 	if (bIsShow)
 	{
@@ -736,15 +859,19 @@ BOOL CMainDialog::RefreshServiceStaus(HWND hWnd)
 	//HTTP
 	strSvcStatus = serviceInfo.ServiceStatusToCString(serviceInfo.GetServiceStatus(SVC_NAME_SPLHTTPSVC));
 	SetListItemText(hWnd, nItemIndex++, strSvcStatus.GetBuffer());
+	strSvcStatus.ReleaseBuffer();
 	//MZD
 	strSvcStatus = serviceInfo.ServiceStatusToCString(serviceInfo.GetServiceStatus(SVC_NAME_SPLMZDIO));
 	SetListItemText(hWnd, nItemIndex++, strSvcStatus.GetBuffer());
+	strSvcStatus.ReleaseBuffer();
 	//TOOL
 	strSvcStatus = serviceInfo.ServiceStatusToCString(serviceInfo.GetServiceStatus(SVC_NAME_SPLTOOLSVC));
 	SetListItemText(hWnd, nItemIndex++, strSvcStatus.GetBuffer());
+	strSvcStatus.ReleaseBuffer();
 	//BT	
 	strSvcStatus = serviceInfo.ServiceStatusToCString(serviceInfo.GetServiceStatus(SVC_NAME_SPLBTSVC));
 	SetListItemText(hWnd, nItemIndex++, strSvcStatus.GetBuffer());
+	strSvcStatus.ReleaseBuffer();
 	return TRUE;
 }
 
@@ -1227,7 +1354,9 @@ BOOL CMainDialog::ServiceStopByName( HWND hWnd, int nItemIndex, TCHAR *szText)
 		{
 			strBuf.Format(_T("%s服务已暂停,无需再次暂停!"), szText);
 			WriteMessage(hWnd, strBuf);
-			SetListItemText(hWnd, nItemIndex, serviceCon.ServiceStatusToCString(SERVICE_STOPPED).GetBuffer());
+			strBuf = serviceCon.ServiceStatusToCString(SERVICE_STOPPED);
+			SetListItemText(hWnd, nItemIndex, strBuf.GetBuffer());
+			strBuf.ReleaseBuffer();
 			break;
 		}
 		switch(dwServiceStatus)
@@ -1248,7 +1377,9 @@ BOOL CMainDialog::ServiceStopByName( HWND hWnd, int nItemIndex, TCHAR *szText)
 			{
 				strBuf.Format(_T("%s服务暂停成功!"), szText);
 				WriteMessage(hWnd, strBuf);
-				SetListItemText(hWnd, nItemIndex, serviceCon.ServiceStatusToCString(SERVICE_STOPPED).GetBuffer());
+				strBuf = serviceCon.ServiceStatusToCString(SERVICE_STOPPED);
+				SetListItemText(hWnd, nItemIndex, strBuf.GetBuffer());
+				strBuf.ReleaseBuffer();
 				bAgain = FALSE;//不继续循环
 			}
 			break;
@@ -1333,7 +1464,9 @@ BOOL CMainDialog::ServiceStartByName( HWND hWnd, int nItemIndex, TCHAR *szText )
 		{
 			strBuf.Format(_T("%s服务已运行,无需再次运行!"), szText);
 			WriteMessage(hWnd, strBuf);
-			SetListItemText(hWnd, nItemIndex, serviceCon.ServiceStatusToCString(SERVICE_RUNNING).GetBuffer());//设置文本为服务正在运行
+			strBuf = serviceCon.ServiceStatusToCString(SERVICE_RUNNING);
+			SetListItemText(hWnd, nItemIndex, strBuf.GetBuffer());//设置文本为服务正在运行
+			strBuf.ReleaseBuffer();
 			break;//退出循环
 		}
 		switch(dwServiceStatus)
@@ -1354,7 +1487,9 @@ BOOL CMainDialog::ServiceStartByName( HWND hWnd, int nItemIndex, TCHAR *szText )
 			{
 				strBuf.Format(_T("%s服务启动成功!"), szText);
 				WriteMessage(hWnd, strBuf);
-				SetListItemText(hWnd, nItemIndex, serviceCon.ServiceStatusToCString(SERVICE_RUNNING).GetBuffer());
+				strBuf = serviceCon.ServiceStatusToCString(SERVICE_RUNNING);
+				SetListItemText(hWnd, nItemIndex, strBuf.GetBuffer());
+				strBuf.ReleaseBuffer();
 				bAgain = FALSE;//不继续循环
 			}
 			break;
@@ -1535,5 +1670,55 @@ DWORD WINAPI CMainDialog::ThreadStopAllService( LPVOID p )
 	HWND hBtn = GetDlgItem(hWnd, IDC_BTN_STOPALLSERVICE);
 	EnableWindow(hBtn, TRUE);	//启用按钮
 	return 1;
+}
+
+BOOL CMainDialog::BtnHideWindow( HWND hWnd )
+{
+	ShowWindow(hWnd, FALSE);
+	m_bWindowIsShow = FALSE;
+	return TRUE;
+}
+
+BOOL CMainDialog::AddMsgToMsgWnd( HWND hMsgWnd )
+{
+	HWND hEdit = GetDlgItem(m_hMsgWnd, IDC_EDIT_MSGTEXT);
+	TCHAR szEditText[1024] = { 0 };
+	TCHAR szBufText[1024] = { 0 };
+	int nLen;
+	Edit_GetText(hEdit, szEditText, 1024);
+	//strText.ReleaseBuffer();
+	for (vector<PSOCKETINMSG>::iterator iter = m_vctMsg.begin();
+		iter != m_vctMsg.end(); ++iter)
+	{
+		swprintf(szBufText, _T("%s\t%s\r\n%s\r\n"), (*iter)->szTime,(*iter)->szTitle, (*iter)->szMsgText);
+		//strBuf.Format(_T("%s\r%s\r\n%s\r\n"), (*iter)->szTime, (*iter)->szTitle, (*iter)->szMsgText);
+		nLen = SendMessage(hEdit, WM_GETTEXTLENGTH, 0, 0);
+		SendMessage(hEdit, EM_SETSEL, 0, (LPARAM)nLen);
+		_tcscat(szEditText,szBufText);
+		//strText += strBuf;
+		//SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)strText.GetBuffer());
+		SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szEditText);
+		//strText.ReleaseBuffer();
+		delete *iter;
+	}
+	m_vctMsg.clear();
+	return TRUE;
+}
+
+VOID CALLBACK TimeShellNotifyIcon( HWND hWnd, UINT uMsg, UINT uTimerID, DWORD dwTime )
+{
+	CMainDialog *pMainDlg = CMainDialog::Instance();
+	if (pMainDlg->m_bIsFirstIcon)
+	{
+		pMainDlg->m_nid.hIcon = NULL;
+		Shell_NotifyIcon(NIM_MODIFY, &(pMainDlg->m_nid));
+		pMainDlg->m_bIsFirstIcon = FALSE;
+	}
+	else
+	{
+		pMainDlg->m_nid.hIcon =  LoadIcon(pMainDlg->m_hInstance, MAKEINTRESOURCE(IDI_MiniIcon));	//加载图标
+		Shell_NotifyIcon(NIM_MODIFY, &(pMainDlg->m_nid));
+		pMainDlg->m_bIsFirstIcon = TRUE;
+	}
 }
 

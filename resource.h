@@ -13,7 +13,10 @@
 #define IDR_JPG2                        114
 #define IDS_ServiceName                 115
 #define IDS_BrandsName                  116
+#define IDD_DIALOG3                     116
+#define IDD_DLG_MSG                     116
 #define IDC_EDIT1                       1001
+#define IDC_EDIT_MSGTEXT                1001
 #define IDC_EDIT2                       1002
 #define IDC_LIST1                       1004
 #define IDC_BUTTON1                     1005
@@ -42,14 +45,16 @@
 #define IDC_BTN_StartAllService         1025
 #define IDC_BTN_STARTALLSRTVICE         1025
 #define IDC_BTN_STOPALLSERVICE          1026
+#define IDC_BTN_HIDEWINDOW              1027
+#define IDC_BTN_EXIT                    1028
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        116
+#define _APS_NEXT_RESOURCE_VALUE        117
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1027
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
