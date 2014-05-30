@@ -2,8 +2,8 @@
 // Microsoft Visual C++ generated include file.
 // Used by FQ_ServerRc.rc
 //
-#define IDI_ICON                        101
-#define IDI_Close                       108
+#define IDI_ICON                        108
+#define IDI_Close                       122
 #define IDI_MiniIcon                    109
 #define IDD_DIALOG1                     111
 #define IDD_DIALOG2                     112
@@ -15,6 +15,10 @@
 #define IDS_BrandsName                  116
 #define IDD_DIALOG3                     116
 #define IDD_DLG_MSG                     116
+#define IDI_ICON_BT                     119
+#define IDI_ICON_MZD                    120
+#define IDI_ICON_TOOL                   121
+#define IDI_ICON4                       127
 #define IDC_EDIT1                       1001
 #define IDC_EDIT_MSGTEXT                1001
 #define IDC_EDIT2                       1002
@@ -52,7 +56,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        117
+#define _APS_NEXT_RESOURCE_VALUE        128
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101

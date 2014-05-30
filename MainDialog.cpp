@@ -70,6 +70,12 @@ INT_PTR CALLBACK MsgWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 		break;
+	case WM_CLOSE:
+		{
+			ShowWindow(hWnd, SW_HIDE);
+			pMainDlg->m_bMsgWindowsIsShow = FALSE;
+		}
+		break;
 	default:
 		return 0;
 	}
@@ -88,21 +94,20 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				{
 				case WM_RBUTTONUP:	//托盘_右键抬起
 					{
-						if (!pMainDlg->m_bWindowIsShow) //窗口为未显示状态,显示菜单
-						{
-							POINT *lpoint = new tagPOINT;
-							::GetCursorPos(lpoint);//得到鼠标位置
-							pMainDlg->m_hMenu = CreatePopupMenu();
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_OPENPATH,_T("打开目录(&D)"));
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_CONTACT_US,_T("联系我们(&C)"));
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_SERVICE_CONTROL,_T("服务管理(&S)"));
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_PROCESS_CONTROL,_T("程序管理(&A)"));
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_INTERFACE_CONTROL,_T("界面管理(&W)"));
-							AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_EXIT,_T("退出(&E)"));
-							::SetForegroundWindow(pMainDlg->m_hWnd);
-							TrackPopupMenu(pMainDlg->m_hMenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, lpoint->x, lpoint->y, 0, hWnd, NULL);
-							delete	lpoint;
-						}
+
+						POINT *lpoint = new tagPOINT;
+						::GetCursorPos(lpoint);//得到鼠标位置
+						pMainDlg->m_hMenu = CreatePopupMenu();
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_OPENPATH,_T("打开目录(&D)"));
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_CONTACT_US,_T("联系我们(&C)"));
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_SERVICE_CONTROL,_T("服务管理(&S)"));
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_PROCESS_CONTROL,_T("程序管理(&A)"));
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_INTERFACE_CONTROL,_T("界面管理(&W)"));
+						AppendMenu(pMainDlg->m_hMenu,MF_STRING,WM_NOTIFY_EXIT,_T("退出(&E)"));
+						::SetForegroundWindow(pMainDlg->m_hWnd);
+						TrackPopupMenu(pMainDlg->m_hMenu, TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, lpoint->x, lpoint->y, 0, hWnd, NULL);
+						delete	lpoint;
+
 					}
 					break;
 				case WM_LBUTTONDBLCLK:	//托盘_左键双击,无消息时启动URL
@@ -227,6 +232,8 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		break;
 	case WM_INITDIALOG:	//窗口创建
 		{
+			HWND hList = GetDlgItem(hWnd,IDC_LIST_SERVICE);
+			SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadIcon(pMainDlg->m_hInstance, MAKEINTRESOURCE(IDI_MiniIcon)));   
 			pMainDlg->InitServiceList(hWnd);
 			GdiplusStartup(&pMainDlg->m_gdiPlusToken, &pMainDlg->m_gdiPlusInPut, NULL);
 			pMainDlg->WriteMessage(hWnd, _T("初始化完成"));
@@ -421,6 +428,7 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 	
 	//创建窗口
 	m_hWnd = CreateDialog(hInstance, MAKEINTRESOURCEW(IDD_DLG_MAIN), NULL, WindowProc);
+	
 	if (m_hWnd == NULL)
 	{
 		WRITE_LOG(LOG_LEVEL_FATAL, _T("创建窗体失败! ErrorCode : 0x%08X"), GetLastError());
@@ -435,6 +443,7 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 		CloseHandle(m_hMutex);
 		ExitProcess(0);
 	}
+
 	m_bMsgWindowsIsShow = FALSE;
 	//显示窗口
 	if (bIsShow)
@@ -771,26 +780,27 @@ BOOL CMainDialog::InitServiceList(HWND hWnd)
 	SendMessage(hList, LVM_INSERTCOLUMN, 3, (LPARAM)&lvc);
 	
 	//设置图标
-	//HTTP服务图标	
-	HIMAGELIST hImageList = ImageList_Create(32, 32, ILC_COLOR16 | ILC_MASK, 0, 0);//创建图标列表
-	ListView_SetImageList(hList, hImageList, LVSIL_SMALL);
-	HICON hIcon = LoadIcon(m_hInstance, MAKEINTRESOURCE(IDI_ICON));
-	ImageList_AddIcon(hImageList, hIcon);
+	HIMAGELIST  hImageList = ImageList_Create(32, 32, ILC_COLOR16 | ILC_MASK, 0, 0);
+	ListView_SetImageList(hList,hImageList,LVSIL_SMALL);
+	HICON  hIcon = NULL;
+
+
+
+	hIcon = LoadIcon(m_hInstance,MAKEINTRESOURCE(IDI_ICON));
+	ImageList_AddIcon(hImageList,hIcon);
 	DestroyIcon(hIcon);
-	SHFILEINFO hFileInfo;
-	//MZD服务图标
-	CString strAppPath = CAppMain::GetAppPath();//程序路径
-	SHGetFileInfo(strAppPath + _T("MZDIO.exe"), 0, &hFileInfo, sizeof(SHFILEINFO), SHGFI_ICON);
-	ImageList_AddIcon(hImageList, hFileInfo.hIcon);
-	DestroyIcon(hFileInfo.hIcon);
-	//保姆服务图标
-	SHGetFileInfo(strAppPath + _T("toolsvc.exe"), 0, &hFileInfo, sizeof(SHFILEINFO), SHGFI_ICON);
-	ImageList_AddIcon(hImageList, hFileInfo.hIcon);
-	DestroyIcon(hFileInfo.hIcon);
-	//BT服务图标
-	SHGetFileInfo(strAppPath + _T("btsvc.exe"), 0, &hFileInfo, sizeof(SHFILEINFO), SHGFI_ICON);
-	ImageList_AddIcon(hImageList, hFileInfo.hIcon);
-	DestroyIcon(hFileInfo.hIcon);
+
+	hIcon = LoadIcon(m_hInstance,MAKEINTRESOURCE(IDI_ICON_MZD));
+	ImageList_AddIcon(hImageList,hIcon); 
+	DestroyIcon(hIcon);
+
+	hIcon = LoadIcon(m_hInstance,MAKEINTRESOURCE(IDI_ICON_TOOL));
+	ImageList_AddIcon(hImageList,hIcon);
+	DestroyIcon(hIcon);
+
+	hIcon = LoadIcon(m_hInstance,MAKEINTRESOURCE(IDI_ICON_BT));
+	ImageList_AddIcon(hImageList,hIcon);
+	DestroyIcon(hIcon);
 	
 	
 	//设置服务状态
@@ -805,7 +815,7 @@ BOOL CMainDialog::InitServiceList(HWND hWnd)
 	nItemIndex = SendMessage(hList, LVM_INSERTITEM, 0, (LPARAM)&lvItem);
 	lvItem.iSubItem = 1;
 	lvItem.iItem = nItemIndex;
-	lvItem.iImage = 2;
+	lvItem.iImage = 1;
 	lvItem.pszText = _T("斯普林名智界面管理服务");
 	SendMessage(hList, LVM_SETITEM, 0, (LPARAM)&lvItem);
 
@@ -827,7 +837,7 @@ BOOL CMainDialog::InitServiceList(HWND hWnd)
 	SendMessage(hList, LVM_INSERTITEM, 0, (LPARAM)&lvItem);
 	lvItem.iItem = nItemIndex;
 	lvItem.iSubItem = 1;
-	lvItem.iImage = 2;
+	lvItem.iImage = 3;
 	lvItem.pszText = (_T("斯普林名智辅助工具服务"));
 	SendMessage(hList, LVM_SETITEM, 0, (LPARAM)&lvItem);
 
@@ -838,7 +848,7 @@ BOOL CMainDialog::InitServiceList(HWND hWnd)
 	SendMessage(hList, LVM_INSERTITEM, 0, (LPARAM)&lvItem);
 	lvItem.iItem = nItemIndex;
 	lvItem.iSubItem = 1;
-	lvItem.iImage = 2;
+	lvItem.iImage = 4;
 	lvItem.pszText = (_T("斯普林完美下载服务"));
 	SendMessage(hList, LVM_SETITEM, 0, (LPARAM)&lvItem);
 

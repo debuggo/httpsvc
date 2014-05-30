@@ -96,6 +96,9 @@ END
 IDI_ICON                ICON                    "Icon.ico"
 IDI_Close               ICON                    "Close.ico"
 IDI_MiniIcon            ICON                    "MiniIcon.ico"
+IDI_ICON_BT             ICON                    "btsvc_105.ico"
+IDI_ICON_MZD            ICON                    "MZDIO_101.ico"
+IDI_ICON_TOOL           ICON                    "toolsvc_128.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -172,13 +175,13 @@ BEGIN
     LTEXT           "提示:",IDC_MESSAGE,1,250,411,10,SS_WORDELLIPSIS
 END
 
-IDD_DLG_MSG DIALOGEX 0, 0, 297, 182
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_DLG_MSG DIALOGEX 0, 0, 241, 95
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTERMOUSE | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "斯普林消息记录"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
+FONT 10, "微软雅黑", 400, 0, 0x86
 BEGIN
-    EDITTEXT        IDC_EDIT_MSGTEXT,0,0,297,158,ES_MULTILINE | ES_AUTOHSCROLL | ES_OEMCONVERT | ES_READONLY | WS_VSCROLL,WS_EX_DLGMODALFRAME
-    PUSHBUTTON      "确定",IDC_BTN_EXIT,227,159,70,21
+    EDITTEXT        IDC_EDIT_MSGTEXT,0,0,241,81,ES_MULTILINE | ES_AUTOHSCROLL | ES_OEMCONVERT | ES_READONLY | WS_VSCROLL,WS_EX_DLGMODALFRAME
+    PUSHBUTTON      "确定",IDC_BTN_EXIT,221,83,18,10
 END
 
 

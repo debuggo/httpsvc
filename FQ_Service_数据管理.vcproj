@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="D:\Common\WinFireWall"
+				AdditionalIncludeDirectories="D:\Common\WinFireWall;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -438,11 +438,23 @@
 				>
 			</File>
 			<File
+				RelativePath="C:\Users\DebugGo\Desktop\BT\btsvc_105.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\btsvc_105.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\Close.ico"
 				>
 			</File>
 			<File
 				RelativePath=".\FQ_ServerRc.rc"
+				>
+			</File>
+			<File
+				RelativePath="C:\Users\DebugGo\Desktop\BT\httpsvc_101.ico"
 				>
 			</File>
 			<File
@@ -454,6 +466,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\icon2.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\jpg2.bin"
 				>
 			</File>
@@ -462,7 +478,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MZDIO_101.ico"
+				>
+			</File>
+			<File
+				RelativePath="C:\Users\DebugGo\Desktop\BT\MZDIO_101.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\Title.jpg"
+				>
+			</File>
+			<File
+				RelativePath=".\toolsvc_128.ico"
+				>
+			</File>
+			<File
+				RelativePath="C:\Users\DebugGo\Desktop\BT\toolsvc_128.ico"
 				>
 			</File>
 		</Filter>
