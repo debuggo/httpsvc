@@ -1034,7 +1034,6 @@ int		CBm::GetHardware(CString &strResult)
 	Json::Value	JsonRoot;
 
 	CString	strHardwarePath = pMainApp->GetAppPath() + _T("Hardware\\*.*");
-
 	CFileFind	FileFind;
 	int iResult = FileFind.FindFile(strHardwarePath.GetBuffer(),0);
 
@@ -1054,8 +1053,21 @@ int		CBm::GetHardware(CString &strResult)
 		}
 		if (lstrcmpi(PathFindExtension(strFileName.GetBuffer()),_T(".xm")) == NULL)
 		{
-			GetXmlHardware(FileFind.GetFilePath().GetBuffer(), JsomValue);
-			JsonRoot["Array"].append(JsomValue);
+			CStringA buf(strFileName.GetBuffer());
+			strFileName.ReleaseBuffer();
+			string wks_number = buf.Left(buf.Find('.'));
+			if(pMainApp->m_Mzd.TheWksIsExist(wks_number))
+			{
+				//如果存在就显示
+				GetXmlHardware(FileFind.GetFilePath().GetBuffer(), JsomValue);
+				JsonRoot["Array"].append(JsomValue);
+			}
+			else
+			{
+				//如果不存在就删除该文件
+				//DeleteFile(FileFind.GetFilePath());
+				continue;
+			}
 		}
 	}
 	Json::FastWriter	JsonWriter;
@@ -1090,8 +1102,22 @@ int		CBm::GetStatus(CString &strResult)
 		}
 		if (lstrcmpi(PathFindExtension(strFileName.GetBuffer()),_T(".xm")) == NULL)
 		{
-			GetXmlStatus(FileFind.GetFilePath().GetBuffer(), JsomValue);
-			JsonRoot["Array"].append(JsomValue);
+
+			CStringA buf(strFileName.GetBuffer());
+			strFileName.ReleaseBuffer();
+			string wks_number = buf.Left(buf.Find('.'));
+			if(pMainApp->m_Mzd.TheWksIsExist(wks_number))
+			{
+				//如果存在就显示
+				GetXmlStatus(FileFind.GetFilePath().GetBuffer(), JsomValue);
+				JsonRoot["Array"].append(JsomValue);
+			}	
+			else
+			{
+				//如果不存在就删除该文件
+				//DeleteFile(FileFind.GetFilePath());
+				continue;
+			}
 		}
 	}
 	Json::FastWriter	JsonWriter;

@@ -117,8 +117,10 @@ class CMzd
 
 	int			GetMzdApiCallAddress();
 	int 		GetMzdFreeAddress();
+	bool	TheWksIsExist(string wks_number);
 public:
 	CJsonEx		m_JsonEx;
 private:
 	string GetQueryString(string wksNumber);
+	string FormatMzdErrorCode(int err);
 };

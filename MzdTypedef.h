@@ -90,55 +90,52 @@ enum WKS_CMD_TYPE
 
 enum tagMzdResult
 {
-	MZD_SUCCESS = 0,//成功
-	MZD_MODIFY_NAME_FAILED =1,//修改成功，但名称修改失败
-	MZD_ADD_FAILED_REASON_EXIST = 2,//添加失败，存在该设置,编号存在或MAC存在
-	MZD_CFG_NOT_EXIST_ERROR = 3,//不存在该设置
-	MZD_SERVER_NOT_EXIST_ERROR = 4,//服务器设置不存在
-	MZD_DISKNAME_IMGPATH_ERROR = 5,//磁盘名或IMG包路径错误
-	MZD_DISKSET_IS_IN_USE_ERROR = 6,//磁盘设置,服务器设置正在使用中，不能删除
-	MZD_GET_REMOTE_IMG_SECTOR_ERROR = 7,//获取远端扇区数失败
-	MZD_NETWORK_ERROR = 8,//网络错误
-	MZD_FORBIDDEN_ERROR = 9,//禁止操作
-	MZD_WKS_CFG_EXIST_ERROR = 10,//工作站存在,提示是否删除
-	MZD_MODIFY_NAME_EXIST_ERROR = 11,//修改名称存在,不能将其修改为该名称
-	MZD_PASSWORD_ERROR = 12,//通讯密码错误
-	MZD_ILLEGAL_CONNECT_ERROR = 13,//非法链接
-	MZD_MODIFY_GLOBAL_SUPERWKS_ERROR = 14,//修改全局设置中修改超管失败，原超管工作站在线，需要重启该超管工作站
-	MZD_IP_CLASH_ERROR = 15,//IP地址与其他设置的IP冲突
-	MZD_MAC_CLASH_ERROR = 16,//操作失败,MAC地址冲突
-	MZD_NUMBER_CLASH_ERROR = 17,//操作失败,编号冲突
-	MZD_SERVERNAME_ERROR = 18,//操作失败,服务器名称冲突
-	MZD_GATEWAY_ERROR = 19,//操作失败,服务器名称冲突
-	MZD_Res_Msg_Succeed = 40,//操作成功
-	MZD_Res_Msg_Succeed_Login = 41,//
-	MZD_Res_Msg_Succeed_Login_KEYFILE = 42,//取码生成KEY文件成功
-	MZD_Res_Msg_Succeed_Verify = 43,//校验成功
-	MZD_Res_Msg_Succeed_ChangePCCount = 45,//更改机器台数成功
-	MZD_Res_Msg_fail_Interval = 51,//= '(51)取码间隔太短';
-	MZD_Res_Msg_fail_HD_UnReg = 52,//= '硬盘号未注册';
-	MZD_Res_Msg_fail_IPError = 53,//= '(53)注册IP错误';
-	MZD_Res_Msg_fail_PassErr = 54,//= '(54)用户密码错误';
-	MZD_Res_Msg_fail_TimeOut = 55,//= '(55)使用期限已过';         
-	MZD_Res_Msg_fail_Active = 56,//= '(56)用户被限制使用';
-	MZD_Res_Msg_fail_VerOld = 57,//= '(57)需更新版本';
-	MZD_Res_Msg_fail_VerDisable = 58,//= '(58)此版本已限制使用';
-	MZD_Res_Msg_fail_BindClinet = 59,//    = '(59)绑定客户端需要更高版本';
-	MZD_Res_Msg_fail_DEMO = 60,//= 'DEMO版';
-	MZD_Res_Msg_fail_NetErr = 61,//= '(61)网络错误';
-	MZD_Res_Msg_fail_AgentNOFail = 62,//= '请用新代理商编码'; 
-	MZD_Res_Msg_fail_Verify = 63,//= '校验失败,时间错误';
-	MZD_Res_Msg_fail_Unknown = 64,// = '未知错误';
-	MZD_Res_Msg_fail_SmsCode = 65,//短信码验证错误
-	Res_Msg_fail_MobileInvalid = 66,//无效的手机号码网吧业主手机号码错误
-	Res_Msg_fail_MobileBlack = 67,//手机号码是黑名单
-	Res_Msg_fail_MobileProtect = 68,//目标手机号码在保护名单内
-	Res_Msg_fail_MobileFail = 69,//发送短信失败
-	Res_Msg_fail_Login = 70,//登录失败
-	Res_Msg_fail_HDExpired = 71,//硬盘已过期
-	Res_Msg_fail_Save = 72,//保存数据失败
-	MZD_UNKOWN_MSG_ERROR = 73,//未知消息
-	MZD_SERVICE_NOT_START = 74,//服务未运行
+	MZD_SUCCESS									= 0, //成功
+	MZD_MODIFY_NAME_FAILED 						= 1, //修改成功，但名称修改失败
+	MZD_ADD_FAILED_REASON_EXIST 				= 2, //添加失败，存在该设置,编号存在或MAC存在
+	MZD_CFG_NOT_EXIST_ERROR 					= 3, //不存在该设置
+	MZD_SERVER_NOT_EXIST_ERROR 					= 4, //服务器设置不存在
+	MZD_DISKNAME_IMGPATH_ERROR 					= 5, //磁盘名或IMG包路径错误
+	MZD_DISKSET_IS_IN_USE_ERROR 				= 6, //磁盘设置,服务器设置正在使用中，不能删除
+	MZD_GET_REMOTE_IMG_SECTOR_ERROR 			= 7, //获取远端扇区数失败
+	MZD_NETWORK_ERROR 							= 8, //网络错误																
+	MZD_FORBIDDEN_ERROR 						= 9, //禁止操作
+	MZD_WKS_CFG_EXIST_ERROR 					= 10,//工作站存在,提示是否删除
+	MZD_MODIFY_NAME_EXIST_ERROR 				= 11,//修改名称存在,不能将其修改为该名称
+	MZD_PASSWORD_ERROR 							= 12,//通讯密码错误
+	MZD_ILLEGAL_CONNECT_ERROR 					= 13,//非法链接
+	MZD_MODIFY_GLOBAL_SUPERWKS_ERROR 			= 14,//修改全局设置中修改超管失败，原超管工作站在线，需要重启该超管工作站
+	MZD_ADD_MODIFY_WKS_ERROR 					= 15,//添加，修改失败，错误见详细描述
+	MZD_ADD_MODIFY_SERVER_ERROR 				= 16,//添加，修改服务器失败，错误见详细描述
+	MZD_Res_Msg_Succeed 						= 40,//操作成功
+	MZD_Res_Msg_Succeed_Login 					= 41,//
+	MZD_Res_Msg_Succeed_Login_KEYFILE 			= 42,//取码生成KEY文件成功
+	MZD_Res_Msg_Succeed_Verify 					= 43,//校验成功
+	MZD_Res_Msg_Succeed_ChangePCCount 			= 45,//更改机器台数成功
+	MZD_Res_Msg_fail_Interval 					= 51,//= '(51)取码间隔太短';
+	MZD_Res_Msg_fail_HD_UnReg 					= 52,//= '硬盘号未注册';
+	MZD_Res_Msg_fail_IPError 					= 53,//= '(53)注册IP错误';
+	MZD_Res_Msg_fail_PassErr 					= 54,//= '(54)用户密码错误';
+	MZD_Res_Msg_fail_TimeOut 					= 55,//= '(55)使用期限已过';         
+	MZD_Res_Msg_fail_Active 					= 56,//= '(56)用户被限制使用';
+	MZD_Res_Msg_fail_VerOld 					= 57,//= '(57)需更新版本';
+	MZD_Res_Msg_fail_VerDisable 				= 58,//= '(58)此版本已限制使用';
+	MZD_Res_Msg_fail_BindClinet 				= 59,//    = '(59)绑定客户端需要更高版本';
+	MZD_Res_Msg_fail_DEMO 						= 60,//= 'DEMO版';
+	MZD_Res_Msg_fail_NetErr 					= 61,//= '(61)网络错误';
+	MZD_Res_Msg_fail_AgentNOFail 				= 62,//= '请用新代理商编码'; 
+	MZD_Res_Msg_fail_Verify 					= 63,//= '校验失败,时间错误';
+	MZD_Res_Msg_fail_Unknown 					= 64,// = '未知错误';
+	MZD_Res_Msg_fail_SmsCode 					= 65,//短信码验证错误
+	Res_Msg_fail_MobileInvalid 					= 66,//无效的手机号码网吧业主手机号码错误
+	Res_Msg_fail_MobileBlack 					= 67,//手机号码是黑名单
+	Res_Msg_fail_MobileProtect 					= 68,//目标手机号码在保护名单内
+	Res_Msg_fail_MobileFail 					= 69,//发送短信失败
+	Res_Msg_fail_Login 							= 70,//登录失败
+	Res_Msg_fail_HDExpired 						= 71,//硬盘已过期
+	Res_Msg_fail_Save 							= 72,//保存数据失败
+	MZD_UNKOWN_MSG_ERROR 						= 73,//未知消息
+	MZD_SERVICE_NOT_START 						= 74,//服务未运行
 };
 
 #define MZD_CMD_PORT 10700

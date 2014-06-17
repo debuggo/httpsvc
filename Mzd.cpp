@@ -6,7 +6,6 @@
 #include "mylog.h"
 #include "MZD_INI.h"
 #include "BaseFunc.h"
-
 MzdAgentInit				m_fnMzdAgtInit;
 MzdAgentFree				m_fnMzdAgtFree;
 GetGlobal					m_fnMzdGetGlb;
@@ -2179,6 +2178,90 @@ string CMzd::GetQueryString( string wksNumber )
 {
 	string strBuf="[_tagModifyWksInfo00000000]\r\nstartIp=\r\noldWksNumber="+wksNumber +"bIgnoreError=\r\nbAloneWks=\r\nstartNumber=\r\nendNumber=\r\nwks=_tagWkstationEx00000000\r\n[_tagWkstationEx00000000]\r\nwksNumber=\r\nwksName=\r\nwksIp=\r\nwksMac=\r\nsubMask=\r\ngateway=\r\nscrRes=\r\ngroupId=\r\nnumberLength=\r\nmenuGroup0=_tagMenuSetEx00000000\r\nmenuGroup1=_tagMenuSetEx00000001\r\nmenuGroup2=_tagMenuSetEx00000002\r\nmenuGroup3=_tagMenuSetEx00000003\r\nstartMode=0\r\nLocalMemoryCache=\r\nbStartHotBack=\r\nbAutoRestore=\r\ncomPre=\r\ncomAfx=\r\ndns1=\r\ndns2=\r\nstartServerIp=\r\nbSuperMode=\r\nbOnlineStatus=\r\nbForbidStatus=\r\nbSuperOnline=\r\n[_tagMenuSetEx00000000]\r\ndisplayname=XP\r\ndiskName0=\r\ndiskName1=\r\ndiskName2=\r\ndiskName3=\r\n[_tagMenuSetEx00000001]\r\ndisplayname=\r\ndiskName0=\r\ndiskName1=\r\ndiskName2=\r\ndiskName3=\r\n[_tagMenuSetEx00000002]\r\ndisplayname=\r\ndiskName0=\r\ndiskName1=\r\ndiskName2=\r\ndiskName3=\r\n[_tagMenuSetEx00000003]\r\ndisplayname=\r\ndiskName0=\r\ndiskName1=\r\ndiskName2=\r\ndiskName3=";
 	return strBuf;
+}
+
+bool CMzd::TheWksIsExist( string wks_number )
+{
+	bool ret = false;
+	do 
+	{
+		if (wks_number.length() <= 0)
+		{
+			WRITE_LOG(LOG_LEVEL_WARN, "\"wks_numbet\"不能为空");
+			break;
+		}
+		char *outdata = NULL;
+		if (int err = m_fnMzdCallIni(MZD_GET_WKS_MSG, NULL, &outdata) != 0)
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR, "获取全部工作站信息时发生错误,错误原因:%s", FormatMzdErrorCode(err));
+			break;
+		}
+		wks_number = "wksName=" + wks_number + "\r\nwksIp=";
+		if (strstr(outdata, wks_number.c_str()) == NULL)
+		{
+			break;
+		}
+		ret = true;
+	} while (false);
+	return ret;
+}
+
+std::string CMzd::FormatMzdErrorCode( int err )
+{
+	string ret = "";
+	switch(err)
+	{
+	case MZD_SUCCESS						:	ret = "成功";	break;
+	case MZD_MODIFY_NAME_FAILED 			:	ret = "修改成功，但名称修改失败";	break;
+	case MZD_ADD_FAILED_REASON_EXIST 		:	ret = "添加失败，存在该设置,编号存在或MAC存在";	break;
+	case MZD_CFG_NOT_EXIST_ERROR 			:	ret = "不存在该设置";	break;
+	case MZD_SERVER_NOT_EXIST_ERROR 		:	ret = "服务器设置不存在";	break;
+	case MZD_DISKNAME_IMGPATH_ERROR 		:	ret = "磁盘名或IMG包路径错误";	break;
+	case MZD_DISKSET_IS_IN_USE_ERROR 		:	ret = "磁盘设置,服务器设置正在使用中，不能删除";	break;
+	case MZD_GET_REMOTE_IMG_SECTOR_ERROR 	:	ret = "获取远端扇区数失败";	break;
+	case MZD_NETWORK_ERROR 					:	ret = "网络错误";	break;
+	case MZD_FORBIDDEN_ERROR 				:	ret = "禁止操作";	break;
+	case MZD_WKS_CFG_EXIST_ERROR 			:	ret = "工作站存在,提示是否删除";	break;
+	case MZD_MODIFY_NAME_EXIST_ERROR 		:	ret = "修改名称存在,不能将其修改为该名称";	break;
+	case MZD_PASSWORD_ERROR 				:	ret = "通讯密码错误";	break;
+	case MZD_ILLEGAL_CONNECT_ERROR 			:	ret = "非法链接";	break;
+	case MZD_MODIFY_GLOBAL_SUPERWKS_ERROR 	:	ret = "修改全局设置中修改超管失败，原超管工作站在线，需要重启该超管工作站";	break;
+	case MZD_ADD_MODIFY_WKS_ERROR 			:	ret = "添加，修改失败，错误见详细描述";	break;
+	case MZD_ADD_MODIFY_SERVER_ERROR 		:	ret = "添加，修改服务器失败，错误见详细描述";	break;
+	case MZD_Res_Msg_Succeed 				:	ret = "操作成功";	break;
+	case MZD_Res_Msg_Succeed_Login 			:	ret = "";	break;
+	case MZD_Res_Msg_Succeed_Login_KEYFILE 	:	ret = "取码生成KEY文件成功";	break;
+	case MZD_Res_Msg_Succeed_Verify 		:	ret = "校验成功";	break;
+	case MZD_Res_Msg_Succeed_ChangePCCount 	:	ret = "更改机器台数成功";	break;
+	case MZD_Res_Msg_fail_Interval 			:	ret = "取码间隔太短";	break;
+	case MZD_Res_Msg_fail_HD_UnReg 			:	ret = "硬盘号未注册";	break;
+	case MZD_Res_Msg_fail_IPError 			:	ret = "注册IP错误";	break;
+	case MZD_Res_Msg_fail_PassErr 			:	ret = "用户密码错误";	break;
+	case MZD_Res_Msg_fail_TimeOut 			:	ret = "使用期限已过         ";	break;
+	case MZD_Res_Msg_fail_Active 			:	ret = "用户被限制使用";	break;
+	case MZD_Res_Msg_fail_VerOld 			:	ret = "需更新版本";	break;
+	case MZD_Res_Msg_fail_VerDisable 		:	ret = "此版本已限制使用";	break;
+	case MZD_Res_Msg_fail_BindClinet 		:	ret = "绑定客户端需要更高版本";	break;
+	case MZD_Res_Msg_fail_DEMO 				:	ret = "DEMO版";	break;
+	case MZD_Res_Msg_fail_NetErr 			:	ret = "网络错误";	break;
+	case MZD_Res_Msg_fail_AgentNOFail 		:	ret = "请用新代理商编码 ";	break;
+	case MZD_Res_Msg_fail_Verify 			:	ret = "校验失败,时间错误";	break;
+	case MZD_Res_Msg_fail_Unknown 			:	ret = "未知错误";	break;
+	case MZD_Res_Msg_fail_SmsCode 			:	ret = "短信码验证错误";	break;
+	case Res_Msg_fail_MobileInvalid 		:	ret = "无效的手机号码网吧业主手机号码错误";	break;
+	case Res_Msg_fail_MobileBlack 			:	ret = "手机号码是黑名单";	break;
+	case Res_Msg_fail_MobileProtect 		:	ret = "目标手机号码在保护名单内";	break;
+	case Res_Msg_fail_MobileFail 			:	ret = "发送短信失败";	break;
+	case Res_Msg_fail_Login 				:	ret = "登录失败";	break;
+	case Res_Msg_fail_HDExpired 			:	ret = "硬盘已过期";	break;
+	case Res_Msg_fail_Save 					:	ret = "保存数据失败";	break;
+	case MZD_UNKOWN_MSG_ERROR 				:	ret = "未知消息";	break;
+	case MZD_SERVICE_NOT_START 				:	ret = "服务未运行";	break;
+	default:
+		ret = "未知错误";
+		break;
+	}
+	return ret;
 }
 
 // void	CMzd::Init(CString MzdServerIpAddress, UINT MzdServerPort)

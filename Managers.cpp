@@ -900,12 +900,12 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			nRet = pAppMain->m_Bt.GetSingleSubClassName(pwzsBuffer,strResult);
 			break;
 		}
-	case	60001:
+	case	60001:	//获取工作室硬件配置
 		{
 			nRet = pAppMain->m_Bm.GetHardware(strResult);
 			break;
 		}
-	case	60002:
+	case	60002:		//获取工作站温度信息
 		{
 			nRet = pAppMain->m_Bm.GetStatus(strResult);
 			break;
