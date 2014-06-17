@@ -335,6 +335,7 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			SelectObject(hParentDc,hGDIFont);
 			DeleteObject(hFont);
 			EndPaint(hWnd,&ps);
+			pMainDlg->RefreshServiceStaus(hWnd);
 		}
 		break;
 	case WM_SOCKET_IN:	//接收到BT或MZD的消息
