@@ -438,11 +438,11 @@
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\btsvc_105.ico"
+				RelativePath=".\btsvc_105.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\btsvc_105.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\btsvc_105.ico"
 				>
 			</File>
 			<File
@@ -478,11 +478,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MZDIO_101.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\MZDIO_101.ico"
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\MZDIO_101.ico"
+				RelativePath=".\MZDIO_101.ico"
 				>
 			</File>
 			<File
@@ -490,11 +490,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolsvc_128.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\toolsvc_128.ico"
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\toolsvc_128.ico"
+				RelativePath=".\toolsvc_128.ico"
 				>
 			</File>
 		</Filter>

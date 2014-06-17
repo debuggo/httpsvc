@@ -381,7 +381,6 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 								SetTimer(hWnd, ID_NOTIFYMSG_IN, 400, TimeShellNotifyIcon);
 								pMainDlg->m_bIsHasMsg = TRUE;
 							}
-							
 						}
 						break;
 					case 10:	//删除托盘并退出
@@ -411,7 +410,6 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 
 	TCHAR szDlgName[MAXBYTE] = { 0 };
 	LoadString(NULL, IDS_BrandsName, szDlgName, MAXBYTE);//读取窗口标题
-
 	//检查程序是否已运行
 	m_hMutex = CreateMutex(NULL, FALSE, _T("FQ_MainDlg"));
 	if (ERROR_ALREADY_EXISTS == GetLastError())	//如果互斥体已存在
@@ -425,10 +423,8 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 		ShowWindow(m_hWnd, SW_SHOW);
 		ExitProcess(0);
 	}
-	
 	//创建窗口
 	m_hWnd = CreateDialog(hInstance, MAKEINTRESOURCEW(IDD_DLG_MAIN), NULL, WindowProc);
-	
 	if (m_hWnd == NULL)
 	{
 		WRITE_LOG(LOG_LEVEL_FATAL, _T("创建窗体失败! ErrorCode : 0x%08X"), GetLastError());
@@ -443,7 +439,6 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 		CloseHandle(m_hMutex);
 		ExitProcess(0);
 	}
-
 	m_bMsgWindowsIsShow = FALSE;
 	//显示窗口
 	if (bIsShow)
