@@ -671,7 +671,7 @@ int		CJsonEx::ToIniByJson(CString	strJson, CString	strTableName, MZD_INI*	pstMZD
 	memset(pDocument,0,nJsonlen);
 	::WideCharToMultiByte(CP_ACP,0,strJson.GetBuffer(),-1,pDocument,nJsonlen,NULL,NULL);
 
-	if (!Object.parse(pDocument,Root))
+	if (!Object.parse(pDocument,Root))	//解析json
 	{
 		WRITE_LOG(LOG_LEVEL_ERROR,"Json无法识别 ：%s",pDocument);
 		delete []pDocument;
@@ -679,7 +679,7 @@ int		CJsonEx::ToIniByJson(CString	strJson, CString	strTableName, MZD_INI*	pstMZD
 	}
 	delete []pDocument;
 
-	Iter_St_Bt IterSt = m_StBt.find(strTableName);
+	Iter_St_Bt IterSt = m_StBt.find(strTableName);//找到指定的结构名
 	if (IterSt == m_StBt.end())
 	{
 		//WRITE_LOG(LOG_LEVEL_ERROR,"没有找到结构 ：%s",pDocument);

@@ -910,6 +910,22 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			nRet = pAppMain->m_Bm.GetStatus(strResult);
 			break;
 		}
+	case 60003:	//增加监控行为
+		{
+			break;
+		}
+	case 60004:	//删除监控行为
+		{
+			break;
+		}
+	case 60005:	//修改监控行为
+		{
+			break;
+		}
+	case 60006:	//增加监控行为
+		{
+			break;
+		}
 	}
 	delete []pwzsBuffer;
 	if (pAppMain->m_IsLog)
