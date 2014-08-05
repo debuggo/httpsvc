@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/wd4430"
 				Optimization="0"
-				AdditionalIncludeDirectories="D:\Common\WinFireWall;"
+				AdditionalIncludeDirectories="D:\source\git_source\boost_1_55_0;D:\source\my_common_source\WinFireWall"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -70,6 +70,7 @@
 				AdditionalDependencies="zlib128_x86.lib"
 				OutputFile="$(OutDir)\httpsvc.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="D:\source\git_source\boost_1_55_0\stage\lib"
 				GenerateManifest="false"
 				UACExecutionLevel="1"
 				GenerateDebugInformation="true"
@@ -129,7 +130,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="D:\Common\WinFireWall"
+				AdditionalIncludeDirectories="D:\source\git_source\boost_1_55_0;D:\source\my_common_source\WinFireWall"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -152,6 +153,7 @@
 				AdditionalDependencies="zlib125_x86.lib"
 				OutputFile="$(OutDir)\httpsvc.exe"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="D:\source\git_source\boost_1_55_0\stage\lib"
 				GenerateManifest="false"
 				UACExecutionLevel="2"
 				GenerateDebugInformation="true"
@@ -195,10 +197,6 @@
 			>
 			<File
 				RelativePath=".\AppMain.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Bm.cpp"
 				>
 			</File>
 			<File
@@ -301,14 +299,6 @@
 			</File>
 			<File
 				RelativePath=".\BaseFunc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Bm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\BmTypedef.h"
 				>
 			</File>
 			<File
@@ -434,11 +424,11 @@
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\btsvc_105.ico"
+				RelativePath=".\btsvc_105.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\btsvc_105.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\btsvc_105.ico"
 				>
 			</File>
 			<File
@@ -474,11 +464,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\MZDIO_101.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\MZDIO_101.ico"
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\MZDIO_101.ico"
+				RelativePath=".\MZDIO_101.ico"
 				>
 			</File>
 			<File
@@ -486,11 +476,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolsvc_128.ico"
+				RelativePath="C:\Users\DebugGo\Desktop\BT\toolsvc_128.ico"
 				>
 			</File>
 			<File
-				RelativePath="C:\Users\DebugGo\Desktop\BT\toolsvc_128.ico"
+				RelativePath=".\toolsvc_128.ico"
 				>
 			</File>
 		</Filter>
@@ -506,11 +496,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Common\WinFireWall\WinFireWall.cpp"
+				RelativePath="..\..\my_work_space\HttpSvc\FQ_Service_数据管理\WinFireWall.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\..\Common\WinFireWall\WinFireWall.h"
+				RelativePath="..\..\my_work_space\HttpSvc\FQ_Service_数据管理\WinFireWall.h"
 				>
 			</File>
 		</Filter>
@@ -519,6 +509,30 @@
 			>
 			<File
 				RelativePath=".\MzdTypedef.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="BM"
+			>
+			<File
+				RelativePath=".\Bm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Bm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BmMonitorIni.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\BmMonitorIni.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BmTypedef.h"
 				>
 			</File>
 		</Filter>

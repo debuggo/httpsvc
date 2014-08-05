@@ -706,6 +706,7 @@ struct _tagWkstation
 	DWORD m_LiveRecvTime;//心跳包返回时间
 	DWORD m_WksPhysicalMemory;//工作站上报的物理内存(MB)
 	bool bSuperOnline;//超管在线状态
+	DWORD wkdDiskSecs;//系统磁盘大小
 
 	MZD_CHAR menu_set[4][MZD_LENGTH_32];//菜单内部名
 

@@ -6,6 +6,9 @@
 #include "Bt.h"
 #include "mylog.h"
 #include "MyFileOperating.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 VOID	WINAPI		OrganizeFile(TCHAR*	pstrFile)
 {
@@ -1198,6 +1201,33 @@ BOOL CBm::DeleteWksInfo( std::string wksInfo )
 	fileOp.MyDeleteFile(strDeleteFile);
 	
 	return TRUE;
+}
+
+bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
+{
+	//导入boost属性树库
+	using namespace boost::property_tree;
+	bool ret = false;	//返回值默认为0(失败)
+	if (strJson.Empty())
+	{
+		strResult = L"传入数据为空";
+	}
+	else
+	{
+		try
+		{
+			wptree jsonboot;
+			read_json(strJson, jsonboot);
+			int action_type = jsonboot.get<int>("action_type");
+		}
+		catch(json_parser_error err)
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR, L"解析json错误,%s", err.what());
+			strResult = err.what();
+		}
+		
+	}
+	return ret;
 }
 
 

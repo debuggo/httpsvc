@@ -62,7 +62,23 @@ public:
 	int		GetHardware(CString&	strResult);
 	int		GetStatus(CString&	strResult);
 
+	/**
+	*清除工作站传入的文件
+	*@param wksInfo 工作站编号
+	*@return true成功,FALSE失败
+	*/
 	BOOL DeleteWksInfo(std::string wksInfo);
+
+	/****************************************************************************************************
+	* 传入action_type查询在配置文件中存在的监控行为
+	*	\param strJson 传入的json请求字符串里面应包含action_type信息
+	*	\param strResult 用于返回字符串信息unicode编码
+	*	\return 错误信息
+	*	\retval true 成功
+	*	\retval false 失败,将在strResult中返回错误信息
+	****************************************************************************************************/
+	bool QueryMonitorAction(CString strJson, CString &strResult);
+
 //private:
 //	BOOL MyDeleteFile(const CString &strFilePath);
 
