@@ -4,6 +4,7 @@
 #include "MzdTypedef.h"
 #include "mylog.h"
 #include <string>
+#include "IniFile.h"
 typedef struct _SignalPack
 {
 	int iSignalHead;//信号头类型---枚举SignalOperType
@@ -82,7 +83,12 @@ public:
 
 //private:
 //	BOOL MyDeleteFile(const CString &strFilePath);
-
+private:
+	CString GetClientCfgPath();
+	bool GetAllActionByType(const int action_type, CString &out_str);
+	bool GetActionsByType(const int action_type, bool isuse);
+	bool GetUnusefulValueByType(const CIniFile &ini, const int action_type);
+	bool GetClientCfgKey(const CIniFile ini, const CString &section, const CString &key, CString &out_value);
 };
 
 ////初始化,从网吧保姆下载配置  dwCount = 保姆配置数量 pConfigNames为保姆配置名称数组  dwRefCount = 关联配置数量 

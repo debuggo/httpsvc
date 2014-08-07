@@ -6,11 +6,8 @@
 #include "Bt.h"
 #include "mylog.h"
 #include "MyFileOperating.h"
-#include "BmIniManagement.h"
 #include "Action.h"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include "IniFile.h"
 VOID	WINAPI		OrganizeFile(TCHAR*	pstrFile)
 {
 	HANDLE hFile2 = CreateFile(pstrFile, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -1215,7 +1212,8 @@ bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 		return false;
 	}
 	int action_type = root["action_type"].asInt();
-
+	CIniFile inifile;
+	inifile.SetPath(GetClientCfgPath());
 	//using namespace boost::property_tree;
 	//bool ret = false;
 	//ptree boot;
@@ -1236,5 +1234,13 @@ bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 	//
 	//return ret;
 }
+
+
+
+CString CBm::GetClientCfgPath()
+{
+ return CAppMain::GetAppPath() + L"\\Update\\ClientCfg.ini";
+}
+
 
 
