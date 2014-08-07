@@ -114,6 +114,7 @@ class CMzd
 	int			Mzd_GetDiskSetCfgEx(CString	strJson,	CString&	strResult);
 	int			Mzd_GetCacheInfo(CString	strJson,	CString&	strResult);
 	int			Mzd_ModifyWksMac(CString	strJson,	CString&	strResult);
+	int		Mzd_GetWksByWksNum(CString strJson, CString &strResult);
 
 	int			GetMzdApiCallAddress();
 	int 		GetMzdFreeAddress();

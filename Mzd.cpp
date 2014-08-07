@@ -1139,6 +1139,10 @@ int		CMzd::Mzd_AddWksCfg(CString strJson, CString& strResult)
 	////strResult.Format(_T("0"));
 	//m_JsonEx.ToStructRelease(lpStData);
 
+	/**
+	* 首先检查oldWksNumber是否为-1,如果为-1就查询工作站模板.
+	* 否则就添加工作站.
+	*/
 	MZD_INI	InIni;
 	if (!m_JsonEx.ToIniByJson(strJson,_T("_tagModifyWksInfo"),&InIni))
 	{
@@ -1148,26 +1152,48 @@ int		CMzd::Mzd_AddWksCfg(CString strJson, CString& strResult)
 	}
 	std::string	strMessageFormat;
 	InIni.Format2Str(strMessageFormat);
-
+	//strMessageFormat = GetQueryString("-1");
 	char*	pRetData = NULL;
-	int nErrorRet = m_fnMzdCallIni(MZD_ADD_WKS_MSG,strMessageFormat.c_str(),&pRetData);
-	if (nErrorRet != NULL)
-	{
-		WRITE_LOG(LOG_LEVEL_ERROR,"40015错误，错误码：%d",nErrorRet);
-		strResult.Format(_T("%d"),nErrorRet);
-		//return -1;
-	}
+	int nErrorRet = NULL;
 	MZD_INI	OutIni;
-	OutIni.Load(pRetData);
-
-	OutIni.Write2INI(_T("_tagAddWksInfoError"),0,_T("ErorrCode"),nErrorRet);
-	if (!m_JsonEx.ToJsonByIni(&OutIni,_T("_tagAddWksInfoError"),0,strResult))
+	if (strMessageFormat.find("oldWksNumber=-1"))//如果是oldwksnum == -1 就是取工作站模板
 	{
-		WRITE_LOG(LOG_LEVEL_ERROR,"40015命令 转JSON失败！");
-		strResult.Format(_T("%d"),5005);
-		return -1;
+		nErrorRet = m_fnMzdCallIni(MZD_GET_WKS_BY_WKSNUM_MSG,strMessageFormat.c_str(),&pRetData);
+		if (nErrorRet != NULL)
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR,"40015错误，错误码：%d",nErrorRet);
+			strResult.Format(_T("%d"),nErrorRet);
+			//return -1;
+		}
+		OutIni.Load(pRetData);
+		if (!m_JsonEx.ToJsonByIni(&OutIni, _T("_tagModifyWksInfo"), 0, strResult))
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR,"40015命令 转JSON失败！");
+			strResult.Format(_T("%d"),5005);
+			return -1;
+		}
+		m_fnMzdFreeIni(pRetData);
 	}
-	m_fnMzdFreeIni(pRetData);
+	else	//否则就是添加工作站
+	{
+		nErrorRet = m_fnMzdCallIni(MZD_ADD_WKS_MSG,strMessageFormat.c_str(),&pRetData);
+		if (nErrorRet != NULL)
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR,"40015错误，错误码：%d",nErrorRet);
+			strResult.Format(_T("%d"),nErrorRet);
+			//return -1;
+		}
+
+		OutIni.Load(pRetData);
+		OutIni.Write2INI(_T("_tagAddWksInfoError"),0,_T("ErorrCode"),nErrorRet);
+		if (!m_JsonEx.ToJsonByIni(&OutIni,_T("_tagAddWksInfoError"),0,strResult))
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR,"40015命令 转JSON失败！");
+			strResult.Format(_T("%d"),5005);
+			return -1;
+		}
+		m_fnMzdFreeIni(pRetData);
+	}
 	return 1;
 }
 

@@ -6,8 +6,11 @@
 #include "Bt.h"
 #include "mylog.h"
 #include "MyFileOperating.h"
+#include "BmIniManagement.h"
+#include "Action.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
+#include <boost/property_tree/json_parser.hpp>
 VOID	WINAPI		OrganizeFile(TCHAR*	pstrFile)
 {
 	HANDLE hFile2 = CreateFile(pstrFile, GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -1203,9 +1206,35 @@ BOOL CBm::DeleteWksInfo( std::string wksInfo )
 
 bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 {
-	bool ret = false;
+	Json::Reader object;
+	Json::Value root;
+	string json = CW2A(strJson);
+	if (!object.parse(json, root))
+	{
+		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析失败.");
+		return false;
+	}
+	int action_type = root["action_type"].asInt();
 
-	return ret;
+	//using namespace boost::property_tree;
+	//bool ret = false;
+	//ptree boot;
+	//try
+	//{
+	//	std::stringstream jsonstream;	//json解析流
+	//	jsonstream << CW2A(strJson);
+	//	read_json(jsonstream, boot);	//解析json
+	//	int type = boot.get<int>(L"action_type");
+	//	int path = CW2A(CAppMain.GetAppPath());	//获取文件的运行路径
+	//	path += kMonitorPath;					//加上ini文件的相对路径
+	//	BmIniManagement clientcgf(path);		
+	//}
+	//catch (json_parser_error err)
+	//{
+	//	WRITE_LOG(LOG_LEVEL_ERROR, L"解析json错误:", err.what());
+	//}
+	//
+	//return ret;
 }
 
 

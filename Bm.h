@@ -47,9 +47,8 @@ enum SignalOperType
 #define SERVER_TCP_PORT	    26504   //保姆服务器开放的TCP端口
 #define SERVER_UDP_PORT 	26504   //保姆服务器开放的UDP端口
 #define MONITOR_UDP_PORT    26505   //监控查看端开放的UDP端口
-//const string kMonitorPath = "\\Update\\ClientCfg.ini";
-//const string kMonitorIniDefaultSection = "System default";
-//const string kMonitorIniUnusefulSection = "Unuseful Action";
+const string kMonitorPath = "\\Update\\ClientCfg.ini";	//保姆的clientcfg.ini的相对路径
+
 class	CBm
 {
 public:
