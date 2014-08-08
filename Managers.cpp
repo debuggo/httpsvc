@@ -956,9 +956,8 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			返回
 			{listfortype:[action1:{...},action2:{...}]}
 			*****************************************************************************************************/
-			pwzsBuffer = L"{\"action_type\":\"8\"}";
 			//测试需要将字符编码转换为utf-8
-	//		pAppMain->m_Bm.QueryMonitorAction(pwzsBuffer, strResult);
+			pAppMain->m_Bm.QueryMonitorAction(pwzsBuffer, strResult);
 			break;
 		}
 	}

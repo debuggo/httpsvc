@@ -5,6 +5,8 @@
 #include "mylog.h"
 #include <string>
 #include "IniFile.h"
+#include <vector>
+#include "Action.h"
 typedef struct _SignalPack
 {
 	int iSignalHead;//信号头类型---枚举SignalOperType
@@ -84,11 +86,27 @@ public:
 //private:
 //	BOOL MyDeleteFile(const CString &strFilePath);
 private:
+
+	/**
+	 @fn	CString CBm::GetClientCfgPath();
+	
+	 @brief	获取ClientCfg.ini的路径.
+	
+	 @date	8/8/2014
+	
+	 @return	CString ClientCfg.ini的绝对路径.
+	 */
+
 	CString GetClientCfgPath();
-	bool GetAllActionByType(const int action_type, CString &out_str);
-	bool GetActionsByType(const int action_type, bool isuse);
-	bool GetUnusefulValueByType(const CIniFile &ini, const int action_type);
-	bool GetClientCfgKey(const CIniFile ini, const CString &section, const CString &key, CString &out_value);
+
+	CString GetOperationActionsByType(const int action_type);
+	bool GetUnOperationActionsByType(const int action_type);
+	bool RefreshAllActions();
+	void AddActionToIni(const int action_index, const Action &add_action);
+	CString GetJsonStringByType(const int get_how, const int action_type);
+	CIniFile ini_;
+	std::vector<Action> operation_actions_;
+	std::vector<Action> unoperation_actions_;
 };
 
 ////初始化,从网吧保姆下载配置  dwCount = 保姆配置数量 pConfigNames为保姆配置名称数组  dwRefCount = 关联配置数量 

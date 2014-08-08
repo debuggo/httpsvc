@@ -1,6 +1,5 @@
 #pragma once
-#include <string>
-using std::string;
+#include "FQ_Std.h"
 class Action
 {
 public:
@@ -19,32 +18,39 @@ public:
 	 @param	isunuseful	(Optional) 是否有效,默认为false(有效).
 	 */
 
-	Action(int type = -1, string param1 = "", string param2 = "", bool isunuseful = false)
-		:type_(type), param1_(param1), param2_(param2), isunuseful_(isunuseful){};
+	Action(int type = -1, CString param1 = L"", CString param2 = L"", bool isoperation = false)
+		:type_(type), param1_(param1), param2_(param2), isoperation_(isoperation){};
 	~Action();
 	bool operator == (const Action &other) const 
 	{
 		return (this->type() == other.type() &&  this->param1() == other.param1() 
-			&& this->param2() == other.param2() && this->Isunuseful() == other.Isunuseful());
+			&& this->param2() == other.param2() && this->Isoperation() == other.Isoperation());
 	}
 	Action& operator =(const Action &other)
 	{
 		this->param1_ = other.param1();
 		this->param2_ = other.param2();
 		this->type_ = other.type();
-		this->isunuseful_ = other.Isunuseful();
+		this->isoperation_ = other.Isoperation();
 		return *this;
 	}
 	//set  get
 	const int type() const { return type_; }
 	void type(const int typein){ type_ = typein; }
-	const string& param1() const { return param1_; }
-	void param1(const string &param1in){ param1_ = param1in; }
-	const string& param2() const { return param2_; }
-	void param2(const string &param2in){ param2_ = param2in; }
-	bool Isunuseful() const { return isunuseful_; }
-	void Isunuseful(bool val) { isunuseful_ = val; }
-	
+	const CString& param1() const { return param1_; }
+	void param1(const CString &param1in){ param1_ = param1in; }
+	const CString& param2() const { return param2_; }
+	void param2(const CString &param2in){ param2_ = param2in; }
+	bool Isoperation() const { return isoperation_; }
+	void Isoperation(bool val) { isoperation_ = val; }
+	const CString name() const 
+	{
+		if (type_ == 88)
+		{
+			return L"配置结束";
+		}
+		return L"";
+	}
 private:
 
 	/**
@@ -54,22 +60,21 @@ private:
 	int type_;
 
 	/**
-	 @brief	是否无效.
-	 @note true = 无效,false = 有效.
+	 @brief	是否有效.
+	 @note true = 有效,false = 无效.
 	 */
 
-	bool isunuseful_;
-
+	bool isoperation_;
 	/**
 	 @brief	参数.
 	 */
 
-	string param1_;
+	CString param1_;
 
 	/**
 	 @brief	附加参数.
 	 */
 
-	string param2_;
+	CString param2_;
 };
 
