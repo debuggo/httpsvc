@@ -104,7 +104,9 @@ private:
 	bool RefreshAllActions();
 	void AddActionToIni(const int action_index, const Action &add_action);
 	CString GetJsonStringByType(const int get_how, const int action_type);
+	CString GetJsonFromVector(const CString &list_name, std::vector<Action> &actions);
 	CIniFile ini_;
+	std::vector<Action> actions_;
 	std::vector<Action> operation_actions_;
 	std::vector<Action> unoperation_actions_;
 };

@@ -10,9 +10,9 @@
 #include <fstream>
 enum kGetHow
 {
-	kOperationAction,
-	kUnOperationAction,
-	kAllAction
+	kOperationAction,	//生效行为
+	kUnOperationAction,	//未生效行为
+	kAllAction			//全部行为
 };
 const CString kOperationSectionName = _T("System default");
 const CString kUnOperationSectionName = _T("UnOperation");
@@ -1262,7 +1262,7 @@ CString CBm::GetOperationActionsByType(const int action_type)
 	
 	RefreshAllActions();
 	//开始写json
-	return GetJsonStringByType(kOperationAction,action_type);
+	return GetJsonStringByType(kAllAction,action_type);
 }
 
 bool CBm::RefreshAllActions()
@@ -1274,6 +1274,7 @@ bool CBm::RefreshAllActions()
 	*/
 	operation_actions_.clear();
 	unoperation_actions_.clear();
+	actions_.clear();
 	if (ini_.SectionExist(kOperationSectionName))	//检测指定段是否存在
 	{
 		CStringArray keys, values;
@@ -1286,13 +1287,13 @@ bool CBm::RefreshAllActions()
 			values[i+2],//param2
 			true//isoperation
 			);
-			operation_actions_.push_back(temp);
+			actions_.push_back(temp);
 		}
 		//判断最后一个key是否为配置结束
 		Action temp(88,L"",L"", true);
-		if (!(operation_actions_[operation_actions_.size()-1] == temp))
+		if (!(actions_[actions_.size()-1] == temp))
 		{
-			operation_actions_.push_back(temp);
+			actions_.push_back(temp);
 			//在配置文件中加入
 			AddActionToIni(key_number/4, temp);	//the value "key_number" is all keys number.need / 4
 		}
@@ -1306,7 +1307,7 @@ bool CBm::RefreshAllActions()
 	if (ini_.SectionExist(kUnOperationSectionName))
 	{
 		CStringArray keys, values;
-		int key_number = ini_.GetAllKeysAndValues(kOperationSectionName, keys, values);
+		int key_number = ini_.GetAllKeysAndValues(kUnOperationSectionName, keys, values);
 		for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
 		{
 			Action temp(
@@ -1315,13 +1316,13 @@ bool CBm::RefreshAllActions()
 				values[i+2],//param2
 				false//isoperation
 				);
-			unoperation_actions_.push_back(temp);
+			actions_.push_back(temp);
 		}
 		//判断最后一个key是否为配置结束
 		Action temp(88,L"",L"", false);
-		if (!(operation_actions_[operation_actions_.size()-1] == temp))
+		if (!(actions_[actions_.size()-1] == temp))
 		{
-			unoperation_actions_.push_back(temp);
+			actions_.push_back(temp);
 			//在配置文件中加入
 			AddActionToIni(key_number/4, temp);	//the value "key_number" is all keys number.need / 4
 		}
@@ -1369,45 +1370,62 @@ void CBm::AddActionToIni(const int action_index, const Action &add_action)
 CString CBm::GetJsonStringByType(const int get_how, const int action_type)
 {
 	CString ret;
-	switch (get_how)
+	vector<Action> accord_actions;
+	for (vector<Action>::const_iterator it = actions_.begin();
+		it != actions_.end(); ++it)
 	{
-	case kOperationAction:
+		if (it->type() == action_type)	//如果是指定的type
 		{
-			vector<Action> accord_actions;
-			for (vector<Action>::iterator it = operation_actions_.begin();
-				it != operation_actions_.end(); it++)
+			if (get_how == kOperationAction)	//生效
 			{
-				if (it->type() == action_type)
+				if (it->Isoperation())
 				{
 					accord_actions.push_back(*it);
 				}
 			}
-			Json::Value root;
-			Json::Value array_actions;
-			for (vector<Action>::iterator it = accord_actions.begin();
-				it != accord_actions.end(); ++it)
+			else if(get_how == kUnOperationAction)	//未生效
 			{
-				Json::Value action_value;
-				action_value["ActionType"] = it->type();
-				CString temp = it->param1();
-				string param1_temp = CW2A(temp.GetBuffer());
-				temp.ReleaseBuffer();
-				action_value["Param1"] = param1_temp;
-				temp = it->param2();
-				string param2_temp = CW2A(temp.GetBuffer());
-				temp.ReleaseBuffer();
-				action_value["Param2"] = param2_temp;
-				action_value["Valib"] = it->Isoperation();
-				array_actions.append(action_value);
+				if (!it->Isoperation())
+				{
+					accord_actions.push_back(*it);
+				}
 			}
-			root["listfortype"] = array_actions;
-			string temp = root.toStyledString();
-			ret = CA2W(temp.c_str());
+			else	//全部
+			{
+				accord_actions.push_back(*it);
+			}
 		}
-		break;
-	default:
-		break;
+
 	}
+	ret = GetJsonFromVector(L"listfortype",accord_actions);
+	return ret;
+}
+
+CString CBm::GetJsonFromVector(const CString &list_name, vector<Action> &actions)
+{
+	CString ret = L"";
+	Json::Value root;
+	Json::Value array_actions;
+	for (vector<Action>::iterator it = actions.begin();
+		it != actions.end(); ++it)
+	{
+		Json::Value action_value;
+		action_value["ActionType"] = it->type();
+		CString temp = it->param1();
+		string param1_temp = CW2A(temp.GetBuffer());
+		temp.ReleaseBuffer();
+		action_value["Param1"] = param1_temp;
+		temp = it->param2();
+		string param2_temp = CW2A(temp.GetBuffer());
+		temp.ReleaseBuffer();
+		action_value["Param2"] = param2_temp;
+		action_value["Valib"] = it->Isoperation();
+		array_actions.append(action_value);
+	}
+	string title = CW2A(list_name);
+	root[title] = array_actions;
+	string temp = root.toStyledString();
+	ret = CA2W(temp.c_str());
 	return ret;
 }
 
