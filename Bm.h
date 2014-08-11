@@ -82,7 +82,7 @@ public:
 	*	\retval false 失败,将在strResult中返回错误信息
 	****************************************************************************************************/
 	bool QueryMonitorAction(CString strJson, CString &strResult);
-
+	bool AddMonitorAction(CString strJson, CString &strResult);
 //private:
 //	BOOL MyDeleteFile(const CString &strFilePath);
 private:

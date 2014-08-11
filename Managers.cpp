@@ -944,6 +944,7 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			返回
 			{listfortype:[action1:{...},action2:{...}]}
 			*****************************************************************************************************/
+			pAppMain->m_Bm.AddMonitorAction(pwzsBuffer, strResult);
 			break;
 		}
 	case 60006:	//查询监控行为

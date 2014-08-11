@@ -1219,14 +1219,14 @@ bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析失败.");
 		return false;
 	}
-	Json::Value valuekey = root["action_type"];
+	Json::Value valuekey = root["ActionType"];
 	if (valuekey.isNull())
 	{
 		return false;
 	}
 	if (valuekey.isInt())
 	{
-		int action_type = root["action_type"].asInt();
+		int action_type = root["ActionType"].asInt();
 		strResult = GetOperationActionsByType(action_type);
 	}
 	return true;
@@ -1397,7 +1397,7 @@ CString CBm::GetJsonStringByType(const int get_how, const int action_type)
 		}
 
 	}
-	ret = GetJsonFromVector(L"listfortype",accord_actions);
+	ret = GetJsonFromVector(L"ListForType",accord_actions);
 	return ret;
 }
 
@@ -1419,7 +1419,7 @@ CString CBm::GetJsonFromVector(const CString &list_name, vector<Action> &actions
 		string param2_temp = CW2A(temp.GetBuffer());
 		temp.ReleaseBuffer();
 		action_value["Param2"] = param2_temp;
-		action_value["Valib"] = it->Isoperation();
+		action_value["IsOperation"] = it->Isoperation();
 		array_actions.append(action_value);
 	}
 	string title = CW2A(list_name);
@@ -1427,6 +1427,35 @@ CString CBm::GetJsonFromVector(const CString &list_name, vector<Action> &actions
 	string temp = root.toStyledString();
 	ret = CA2W(temp.c_str());
 	return ret;
+}
+
+bool CBm::AddMonitorAction(CString strJson, CString &strResult)
+{
+	Json::Reader object;
+	Json::Value root;
+	vector<Action> add_actions;
+	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
+	if (!object.parse(jsontemp, root))
+	{
+		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
+		return false;
+	}
+	const Json::Value addlist = root["AddList"];
+	for (unsigned int i = 0; i < addlist.size(); i++)
+	{
+		string action_param1 = addlist[i]["Param1"].asString();
+		string action_param2 = addlist[i]["Param2"].asString();
+		Action temp;
+		temp.type(addlist[i]["ActionType"].asInt());
+		CString tempstr = CA2W(action_param1.c_str());
+		temp.param1(tempstr);
+		tempstr = CA2W(action_param2.c_str());
+		temp.param2(tempstr);
+		temp.Isoperation(addlist[i]["IsOperation"].asBool());
+		add_actions.push_back(temp);
+	}
+	//TODO:实现添加功能
+	return true;
 }
 
 
