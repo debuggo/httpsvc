@@ -24,7 +24,7 @@ public:
 	bool operator == (const Action &other) const 
 	{
 		return (this->type() == other.type() &&  this->param1() == other.param1() 
-			&& this->param2() == other.param2() && this->Isoperation() == other.Isoperation());
+			&& this->param2() == other.param2() /*&& this->Isoperation() == other.Isoperation()*/);
 	}
 	Action& operator =(const Action &other)
 	{
@@ -43,13 +43,32 @@ public:
 	void param2(const CString &param2in){ param2_ = param2in; }
 	bool Isoperation() const { return isoperation_; }
 	void Isoperation(bool val) { isoperation_ = val; }
-	const CString name() const 
+	inline const CString name() const 
 	{
-		if (type_ == 88)
+		switch(type_)
 		{
+		case 0:
+			return L"分辨率";
+		case 1:
+			return L"快速关机";
+		case 14:
+			return L"VNC控制";
+		case 6:
+			return L"禁用窗口";
+		case 8:
+			return L"IP&MAC绑定";
+		case 9:
+			return L"网络控制";
+		case 12:
+			return L"禁用网络";
+		case 15:
+			return L"保护程序";
+		case 88:	
 			return L"配置结束";
+		default:
+			return L"";
 		}
-		return L"";
+		
 	}
 private:
 

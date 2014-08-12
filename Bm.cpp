@@ -8,6 +8,7 @@
 #include "MyFileOperating.h"
 #include "IniFile.h"
 #include <fstream>
+#include <algorithm>	//vector find
 enum kGetHow
 {
 	kOperationAction,	//生效行为
@@ -1279,6 +1280,8 @@ bool CBm::RefreshAllActions()
 	{
 		CStringArray keys, values;
 		int key_number = ini_.GetAllKeysAndValues(kOperationSectionName, keys, values);
+		Action endaction(88,L"",L"", true);
+		bool isok = false;
 		for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
 		{
 			Action temp(
@@ -1287,15 +1290,18 @@ bool CBm::RefreshAllActions()
 			values[i+2],//param2
 			true//isoperation
 			);
-			actions_.push_back(temp);
+			if (temp == endaction)
+			{
+				isok = true;
+			}
+			else
+				actions_.push_back(temp);
 		}
 		//判断最后一个key是否为配置结束
-		Action temp(88,L"",L"", true);
-		if (!(actions_[actions_.size()-1] == temp))
+		if (!isok)
 		{
-			actions_.push_back(temp);
 			//在配置文件中加入
-			AddActionToIni(key_number/4, temp);	//the value "key_number" is all keys number.need / 4
+			AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
 		}
 	}
 	else
@@ -1308,6 +1314,8 @@ bool CBm::RefreshAllActions()
 	{
 		CStringArray keys, values;
 		int key_number = ini_.GetAllKeysAndValues(kUnOperationSectionName, keys, values);
+		bool isok = false;
+		Action endaction(88,L"",L"", false);
 		for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
 		{
 			Action temp(
@@ -1316,15 +1324,20 @@ bool CBm::RefreshAllActions()
 				values[i+2],//param2
 				false//isoperation
 				);
-			actions_.push_back(temp);
+			if (temp == endaction)
+			{
+				isok = true;
+			}
+			else
+			{
+				actions_.push_back(temp);
+			}
 		}
 		//判断最后一个key是否为配置结束
-		Action temp(88,L"",L"", false);
-		if (!(actions_[actions_.size()-1] == temp))
+		if (!isok)
 		{
-			actions_.push_back(temp);
 			//在配置文件中加入
-			AddActionToIni(key_number/4, temp);	//the value "key_number" is all keys number.need / 4
+			AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
 		}
 	}
 	else
@@ -1433,29 +1446,211 @@ bool CBm::AddMonitorAction(CString strJson, CString &strResult)
 {
 	Json::Reader object;
 	Json::Value root;
-	vector<Action> add_actions;
+	vector<Action> error_actions;	//错误列表
 	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
+	RefreshAllActions();	//refres all actions;
 	if (!object.parse(jsontemp, root))
 	{
 		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
 		return false;
 	}
 	const Json::Value addlist = root["AddList"];
+	int action_type;
 	for (unsigned int i = 0; i < addlist.size(); i++)
 	{
 		string action_param1 = addlist[i]["Param1"].asString();
 		string action_param2 = addlist[i]["Param2"].asString();
 		Action temp;
 		temp.type(addlist[i]["ActionType"].asInt());
+		action_type = temp.type();
 		CString tempstr = CA2W(action_param1.c_str());
 		temp.param1(tempstr);
 		tempstr = CA2W(action_param2.c_str());
 		temp.param2(tempstr);
 		temp.Isoperation(addlist[i]["IsOperation"].asBool());
-		add_actions.push_back(temp);
+		if(!AddActionToVector(temp))	//如果已存在则放入错误列表
+			error_actions.push_back(temp);
 	}
-	//TODO:实现添加功能
+	WriteIni();
+	if (error_actions.empty())
+	{
+		strResult = GetJsonStringByType(kAllAction, action_type);
+	}
+	else
+	{
+		strResult = GetJsonFromVector(L"ListForError", error_actions);
+	}
 	return true;
+}
+
+bool CBm::AddActionToVector(const Action &add_action)
+{
+	vector<Action>::iterator findit = std::find(actions_.begin(), actions_.end(), add_action);
+	if (findit == actions_.end())
+	{
+		actions_.push_back(add_action);
+		return true;
+	}
+	return false;
+}
+
+void CBm::WriteIni()
+{
+	ini_.DeleteAllSections();//清空所有的数据
+	//写入新的数据
+	// 如果不清空会导致写入的Action?序号错乱
+	int count_operation = 0, count_unoperation = 0;
+	for (vector<Action>::iterator it = actions_.begin();
+		it != actions_.end(); ++it)
+	{
+		if (it->Isoperation())
+		{
+			AddActionToIni(count_operation, *it);
+			count_operation++;
+		}
+		else
+		{
+			AddActionToIni(count_unoperation, *it);
+			count_unoperation++;
+		}
+	}
+	//添加每个段的结束
+	Action endaction(88, L"", L"", true);
+	AddActionToIni(count_operation, endaction);
+	endaction.Isoperation(false);
+	AddActionToIni(count_unoperation, endaction);
+}
+
+bool CBm::DelMonitorAction(CString strJson, CString &strResult)
+{
+	Json::Reader object;
+	Json::Value root;
+	vector<Action> error_actions;	//错误列表
+	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
+	RefreshAllActions();	//refres all actions;
+	if (!object.parse(jsontemp, root))
+	{
+		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
+		return false;
+	}
+	const Json::Value addlist = root["DelList"];
+	int action_type;
+	for (unsigned int i = 0; i < addlist.size(); i++)
+	{
+		string action_param1 = addlist[i]["Param1"].asString();
+		string action_param2 = addlist[i]["Param2"].asString();
+		Action temp;
+		temp.type(addlist[i]["ActionType"].asInt());
+		action_type = temp.type();
+		CString tempstr = CA2W(action_param1.c_str());
+		temp.param1(tempstr);
+		tempstr = CA2W(action_param2.c_str());
+		temp.param2(tempstr);
+		temp.Isoperation(addlist[i]["IsOperation"].asBool());
+		if(!DelActionToVector(temp))	//如果已存在则放入错误列表
+			error_actions.push_back(temp);
+	}
+	WriteIni();
+	if (error_actions.empty())
+	{
+		strResult = GetJsonStringByType(kAllAction, action_type);
+	}
+	else
+	{
+		strResult = GetJsonFromVector(L"ListForError", error_actions);
+	}
+	return true;
+}
+
+bool CBm::DelActionToVector(const Action &add_action)
+{
+	vector<Action>::iterator findit = std::find(actions_.begin(), actions_.end(), add_action);
+	if (findit == actions_.end())
+	{
+		return false;
+	}
+	else
+	{
+		actions_.erase(findit);
+		return true;
+	}
+}
+
+bool CBm::ChageMonitorAction(CString strJson, CString &strResult)
+{
+	Json::Reader object;
+	Json::Value root;
+	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
+	RefreshAllActions();	//refres all actions;
+	if (!object.parse(jsontemp, root))
+	{
+		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
+		return false;
+	}
+	//获取oldaction
+	Json::Value old = root["Old"];
+	Json::Value changed = root["New"];
+	Action old_action = JsonToAction(old);
+	Action new_action = JsonToAction(changed);
+	int err = ChangeActionToVector(old_action, new_action);
+	switch(err)
+	{
+	case 0:	//成功
+		{
+			WriteIni();
+			strResult = GetJsonStringByType(kAllAction, new_action.type());
+		}
+		break;
+	case 1:	//未找到old
+		{
+			vector<Action> error_actions;
+			error_actions.push_back(old_action);
+			strResult = GetJsonFromVector(L"ListForError", error_actions);
+		}
+		break;
+	case 2:	//new重复
+		{
+			vector<Action> error_actions;
+			error_actions.push_back(new_action);
+			strResult = GetJsonFromVector(L"ListForError", error_actions);
+		}
+		break;
+	}
+
+	return true;
+}
+
+Action CBm::JsonToAction(const Json::Value root)
+{
+	Action ret;
+	ret.type(root["ActionType"].asInt());
+	CString temp;
+	temp = CA2W(root["Param1"].asString().c_str());
+	ret.param1(temp);
+	temp = CA2W(root["Param2"].asString().c_str());
+	ret.param2(temp);
+	ret.Isoperation(root["IsOperation"].asBool());
+	return ret;
+}
+
+int CBm::ChangeActionToVector(const Action &old_action, const Action &new_action)
+{
+	vector<Action>::iterator findit = find(actions_.begin(), actions_.end(), old_action);
+	if (findit == actions_.end())	//未找到
+	{
+		return 1;
+	}
+	else
+	{
+		vector<Action>::iterator temp = find(actions_.begin(), actions_.end(), new_action);
+		if (temp == actions_.end())
+		{
+			*findit = new_action;
+			return 0;
+		}
+		else
+			return 2;
+	}
 }
 
 

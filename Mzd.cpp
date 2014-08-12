@@ -1156,7 +1156,7 @@ int		CMzd::Mzd_AddWksCfg(CString strJson, CString& strResult)
 	char*	pRetData = NULL;
 	int nErrorRet = NULL;
 	MZD_INI	OutIni;
-	if (strMessageFormat.find("oldWksNumber=-1"))//如果是oldwksnum == -1 就是取工作站模板
+	if (strMessageFormat.find("oldWksNumber=-1") != string::npos)//如果是oldwksnum == -1 就是取工作站模板
 	{
 		nErrorRet = m_fnMzdCallIni(MZD_GET_WKS_BY_WKSNUM_MSG,strMessageFormat.c_str(),&pRetData);
 		if (nErrorRet != NULL)

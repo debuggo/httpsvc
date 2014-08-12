@@ -83,6 +83,8 @@ public:
 	****************************************************************************************************/
 	bool QueryMonitorAction(CString strJson, CString &strResult);
 	bool AddMonitorAction(CString strJson, CString &strResult);
+	bool DelMonitorAction(CString strJson, CString &strResult);
+	bool ChageMonitorAction(CString strJson, CString &strResult);
 //private:
 //	BOOL MyDeleteFile(const CString &strFilePath);
 private:
@@ -98,11 +100,14 @@ private:
 	 */
 
 	CString GetClientCfgPath();
-
 	CString GetOperationActionsByType(const int action_type);
-	bool GetUnOperationActionsByType(const int action_type);
 	bool RefreshAllActions();
 	void AddActionToIni(const int action_index, const Action &add_action);
+	bool AddActionToVector(const Action &add_action);
+	bool DelActionToVector(const Action &add_action);
+	int ChangeActionToVector(const Action &old_action, const Action &new_action);
+	void WriteIni();
+	Action JsonToAction(const Json::Value root);
 	CString GetJsonStringByType(const int get_how, const int action_type);
 	CString GetJsonFromVector(const CString &list_name, std::vector<Action> &actions);
 	CIniFile ini_;

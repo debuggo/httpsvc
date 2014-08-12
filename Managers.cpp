@@ -920,6 +920,7 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			返回
 			{listfortype:[action1:{...},action2:{...}]}                                                                     
 			*****************************************************************************************************/
+			pAppMain->m_Bm.AddMonitorAction(pwzsBuffer, strResult);
 			break;
 		}
 	case 60004:	//删除监控行为
@@ -932,6 +933,7 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			返回
 			{listfortype:[action1:{...},action2:{...}]}
 			*****************************************************************************************************/
+			pAppMain->m_Bm.DelMonitorAction(pwzsBuffer, strResult);
 			break;
 		}
 	case 60005:	//修改监控行为
@@ -944,7 +946,7 @@ DWORD	WINAPI	CManagers::Post_Request(SOCKET	sSocket,	char*	pHttpData,	int nLen)
 			返回
 			{listfortype:[action1:{...},action2:{...}]}
 			*****************************************************************************************************/
-			pAppMain->m_Bm.AddMonitorAction(pwzsBuffer, strResult);
+			pAppMain->m_Bm.ChageMonitorAction(pwzsBuffer, strResult);
 			break;
 		}
 	case 60006:	//查询监控行为
