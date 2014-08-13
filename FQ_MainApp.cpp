@@ -974,7 +974,6 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR
 
 	if (strstr(lpCmdLine,"/MiniIcon") != NULL)	//托盘显示
 	{
-		WRITE_LOG(LOG_LEVEL_FATAL, "开始进入托盘显示");
 		lpCmdLine += strlen("/MiniIcon") + 1;
 		int nShow = atoi(lpCmdLine);
 		//CServiceWindow*	pServiceWindow = CServiceWindow::GetServiceWindow();

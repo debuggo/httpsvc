@@ -63,7 +63,7 @@ public:
 	// 参数:	BOOL bIsShow
 	// 说明:	创建窗体
 	//************************************
-	BOOL CreateMainDialog(HINSTANCE hInstance, BOOL bIsShow);
+	BOOL CreateMainDialog(HINSTANCE hInstance, int bIsShow);
 
 	//************************************
 	// 方法:	OpenUrl

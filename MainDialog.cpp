@@ -405,7 +405,7 @@ INT_PTR CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	return 1;	//处理已完成
 }
 
-BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
+BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, int bIsShow )
 {
 	m_hInstance = hInstance;
 
@@ -442,7 +442,7 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, BOOL bIsShow )
 	}
 	m_bMsgWindowsIsShow = FALSE;
 	//显示窗口
-	if (bIsShow)
+	if (bIsShow == 1)
 	{
 		ShowWindow(m_hWnd, SW_SHOW);
 		m_bWindowIsShow = TRUE;
