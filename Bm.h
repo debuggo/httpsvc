@@ -100,20 +100,50 @@ private:
 	 */
 
 	CString GetClientCfgPath();
-	CString GetOperationActionsByType(const int action_type);
-	bool RefreshAllActions();
+
+	/**
+	 @fn	std::vector<Action> CBm::ReadIni();
+	
+	 @brief	获取ini内容.
+	
+	 @date	8/19/2014
+	
+	 @return	The initialise.
+	 */
+
+	std::vector<Action> ReadIni();
+
+	/**
+	 @fn	bool CBm::WriteIni(const std::vector<action> actions);
+	
+	 @brief	将actions中的内容写入到ini中.
+	
+	 @date	8/19/2014
+	
+	 @param	需要写入的内容.
+	
+	 @return	是否写入成功.
+	 @note 在写入前会清空原ini中的所有内容
+	 */
+
+	bool WriteIni(std::vector<Action> &the_actions);
+
 	void AddActionToIni(const int action_index, const Action &add_action);
-	bool AddActionToVector(const Action &add_action);
-	bool DelActionToVector(const Action &add_action);
-	int ChangeActionToVector(const Action &old_action, const Action &new_action);
-	void WriteIni();
+
+	bool AddActionToVector(const Action &add_action, std::vector<Action> &the_actions);
+	bool DelActionToVector(const Action &add_action, std::vector<Action> &the_actions);
+	int ChangeActionToVector(const Action &old_action, const Action &new_action, std::vector<Action> &the_actions);
+
 	Action JsonToAction(const Json::Value root);
-	CString GetJsonStringByType(const int get_how, const int action_type);
+	CString GetJsonStringByType(const int action_type, const vector<Action> &the_actions, const CString &jsontitle);
 	CString GetJsonFromVector(const CString &list_name, std::vector<Action> &actions);
-	CIniFile ini_;
-	std::vector<Action> actions_;
-	std::vector<Action> operation_actions_;
-	std::vector<Action> unoperation_actions_;
+
+	/**
+	 @brief	全局ini对象,用于读写ini.
+	 */
+
+	//CIniFile ini_;
+	//std::vector<Action> actions_;
 };
 
 ////初始化,从网吧保姆下载配置  dwCount = 保姆配置数量 pConfigNames为保姆配置名称数组  dwRefCount = 关联配置数量 

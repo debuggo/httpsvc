@@ -9,6 +9,7 @@
 #include "IniFile.h"
 #include <fstream>
 #include <algorithm>	//vector find
+#include <process.h>
 enum kGetHow
 {
 	kOperationAction,	//生效行为
@@ -1026,15 +1027,35 @@ int		CBm::GetXmlStatus(TCHAR*	pstrPath, Json::Value&	stJson)
 }
 
 
+
+
 //初始化保姆
 int		CBm::Init()
 {
 
 	DWORD dwServerIp = inet_addr(CW2A(_T("127.0.0.1"), CP_ACP));	
-	ini_.SetPath(GetClientCfgPath());
+
 	DownLoadConfigFile(dwServerIp, "clientcfg.ini");
 	DownLoadConfigFile(dwServerIp, "clcfg.ini");
 
+	//检测ini的合法性
+	CIniFile ini;
+	ini.SetPath(GetClientCfgPath());
+	if (!ini.SectionExist(kOperationSectionName))	//检测system defult
+	{
+		ini.SetKeyValue(kOperationSectionName,_T("ActionType0"), L"88");
+		ini.SetKeyValue(kOperationSectionName,_T("Param10"), L"");
+		ini.SetKeyValue(kOperationSectionName,_T("Param20"), L"");
+		ini.SetKeyValue(kOperationSectionName,_T("ActionName0"), L"配置结束");
+	}
+	if(!ini.SectionExist(kUnOperationSectionName)) //检测UnOperation
+	{
+		ini.SetKeyValue(kUnOperationSectionName,_T("ActionType0"), L"88");
+		ini.SetKeyValue(kUnOperationSectionName,_T("Param10"), L"");
+		ini.SetKeyValue(kUnOperationSectionName,_T("Param20"), L"");
+		ini.SetKeyValue(kUnOperationSectionName,_T("ActionName0"), L"配置结束");
+	}
+	
 	return 0;
 }
 
@@ -1212,44 +1233,30 @@ BOOL CBm::DeleteWksInfo( std::string wksInfo )
 
 bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 {
+	bool ret = false;
 	Json::Reader object;
 	Json::Value root;
 	string json = CW2A(strJson);
-	if (!object.parse(json, root))
+	while(TRUE)
 	{
-		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析失败.");
-		return false;
-	}
-	Json::Value valuekey = root["ActionType"];
-	if (valuekey.isNull())
-	{
-		return false;
-	}
-	if (valuekey.isInt())
-	{
+		if (!object.parse(json, root))
+		{
+			WRITE_LOG(LOG_LEVEL_ERROR, L"json解析失败.");
+			break;
+		}
+		//获取actiontype
+		Json::Value valuekey = root["ActionType"];
 		int action_type = root["ActionType"].asInt();
-		strResult = GetOperationActionsByType(action_type);
+		//读取ini
+		vector<Action> val = ReadIni();
+		//获取指定的类型的json字符串返回
+		strResult = GetJsonStringByType(action_type, val, L"ListForType");
+		Sleep(100);
+		ret = true;
+		break;
 	}
-	return true;
-	//using namespace boost::property_tree;
-	//bool ret = false;
-	//ptree boot;
-	//try
-	//{
-	//	std::stringstream jsonstream;	//json解析流
-	//	jsonstream << CW2A(strJson);
-	//	read_json(jsonstream, boot);	//解析json
-	//	int type = boot.get<int>(L"action_type");
-	//	int path = CW2A(CAppMain.GetAppPath());	//获取文件的运行路径
-	//	path += kMonitorPath;					//加上ini文件的相对路径
-	//	BmIniManagement clientcgf(path);		
-	//}
-	//catch (json_parser_error err)
-	//{
-	//	WRITE_LOG(LOG_LEVEL_ERROR, L"解析json错误:", err.what());
-	//}
-	//
-	//return ret;
+	return ret;
+
 }
 
 
@@ -1257,95 +1264,6 @@ bool CBm::QueryMonitorAction(CString strJson, CString &strResult)
 CString CBm::GetClientCfgPath()
 {
  return CAppMain::GetAppPath() + L"\\Update\\ClientCfg.ini";
-}
-CString CBm::GetOperationActionsByType(const int action_type)
-{
-	
-	RefreshAllActions();
-	//开始写json
-	return GetJsonStringByType(kAllAction,action_type);
-}
-
-bool CBm::RefreshAllActions()
-{
-	/**
-	* 进入方法后清空容器避免重复刷新
-	* 检查生效段是否存在,存在则获取其中内容,否则添加至指定ini
-	* 检查失效段是否存在,存在获取其中内容,否则添加至指定ini
-	*/
-	operation_actions_.clear();
-	unoperation_actions_.clear();
-	actions_.clear();
-	if (ini_.SectionExist(kOperationSectionName))	//检测指定段是否存在
-	{
-		CStringArray keys, values;
-		int key_number = ini_.GetAllKeysAndValues(kOperationSectionName, keys, values);
-		Action endaction(88,L"",L"", true);
-		bool isok = false;
-		for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
-		{
-			Action temp(
-			_wtoi(values[i]),	//actiontype
-			values[i+1],//param1
-			values[i+2],//param2
-			true//isoperation
-			);
-			if (temp == endaction)
-			{
-				isok = true;
-			}
-			else
-				actions_.push_back(temp);
-		}
-		//判断最后一个key是否为配置结束
-		if (!isok)
-		{
-			//在配置文件中加入
-			AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
-		}
-	}
-	else
-	{
-		//TODO:添加生效段的结束
-		Action end_action(88,L"", L"", true);
-		AddActionToIni(0, end_action);
-	}
-	if (ini_.SectionExist(kUnOperationSectionName))
-	{
-		CStringArray keys, values;
-		int key_number = ini_.GetAllKeysAndValues(kUnOperationSectionName, keys, values);
-		bool isok = false;
-		Action endaction(88,L"",L"", false);
-		for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
-		{
-			Action temp(
-				_wtoi(values[i]),	//actiontype
-				values[i+1],//param1
-				values[i+2],//param2
-				false//isoperation
-				);
-			if (temp == endaction)
-			{
-				isok = true;
-			}
-			else
-			{
-				actions_.push_back(temp);
-			}
-		}
-		//判断最后一个key是否为配置结束
-		if (!isok)
-		{
-			//在配置文件中加入
-			AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
-		}
-	}
-	else
-	{
-		Action end_action(88,L"", L"", false);
-		AddActionToIni(0, end_action);
-	}
-	return true;
 }
 
 
@@ -1355,6 +1273,8 @@ void CBm::AddActionToIni(const int action_index, const Action &add_action)
 	/**
 	* 如果add_action为有效数据就添加到System default中.否则就加入到其他项中
 	*/
+	CIniFile ini_;
+	ini_.SetPath(GetClientCfgPath());
 	CString action_type;
 	action_type.Format(L"ActionType%d", action_index);
 	CString type_value;
@@ -1380,37 +1300,19 @@ void CBm::AddActionToIni(const int action_index, const Action &add_action)
 	ini_.SetKeyValue(section_name, action_name, add_action.name());
 }
 
-CString CBm::GetJsonStringByType(const int get_how, const int action_type)
+CString CBm::GetJsonStringByType(const int action_type, const vector<Action> &the_actions, const CString &jsontitle)
 {
 	CString ret;
 	vector<Action> accord_actions;
-	for (vector<Action>::const_iterator it = actions_.begin();
-		it != actions_.end(); ++it)
+	for (vector<Action>::const_iterator it = the_actions.begin();
+		it != the_actions.end(); ++it)
 	{
 		if (it->type() == action_type)	//如果是指定的type
 		{
-			if (get_how == kOperationAction)	//生效
-			{
-				if (it->Isoperation())
-				{
-					accord_actions.push_back(*it);
-				}
-			}
-			else if(get_how == kUnOperationAction)	//未生效
-			{
-				if (!it->Isoperation())
-				{
-					accord_actions.push_back(*it);
-				}
-			}
-			else	//全部
-			{
-				accord_actions.push_back(*it);
-			}
+			accord_actions.push_back(*it);
 		}
-
 	}
-	ret = GetJsonFromVector(L"ListForType",accord_actions);
+	ret = GetJsonFromVector(jsontitle,accord_actions);
 	return ret;
 }
 
@@ -1448,7 +1350,7 @@ bool CBm::AddMonitorAction(CString strJson, CString &strResult)
 	Json::Value root;
 	vector<Action> error_actions;	//错误列表
 	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
-	RefreshAllActions();	//refres all actions;
+	vector<Action> val = ReadIni();	//refres all actions;
 	if (!object.parse(jsontemp, root))
 	{
 		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
@@ -1468,13 +1370,13 @@ bool CBm::AddMonitorAction(CString strJson, CString &strResult)
 		tempstr = CA2W(action_param2.c_str());
 		temp.param2(tempstr);
 		temp.Isoperation(addlist[i]["IsOperation"].asBool());
-		if(!AddActionToVector(temp))	//如果已存在则放入错误列表
+		if(!AddActionToVector(temp, val))	//如果已存在则放入错误列表
 			error_actions.push_back(temp);
 	}
-	WriteIni();
+	WriteIni(val);
 	if (error_actions.empty())
 	{
-		strResult = GetJsonStringByType(kAllAction, action_type);
+		strResult = GetJsonStringByType(action_type, val, L"ListForType");
 	}
 	else
 	{
@@ -1483,25 +1385,27 @@ bool CBm::AddMonitorAction(CString strJson, CString &strResult)
 	return true;
 }
 
-bool CBm::AddActionToVector(const Action &add_action)
+bool CBm::AddActionToVector(const Action &add_action, vector<Action> &the_actions)
 {
-	vector<Action>::iterator findit = std::find(actions_.begin(), actions_.end(), add_action);
-	if (findit == actions_.end())
+	vector<Action>::iterator findit = std::find(the_actions.begin(), the_actions.end(), add_action);
+	if (findit == the_actions.end())
 	{
-		actions_.push_back(add_action);
+		the_actions.push_back(add_action);
 		return true;
 	}
 	return false;
 }
 
-void CBm::WriteIni()
+bool CBm::WriteIni(vector<Action> &the_actions)
 {
+	CIniFile ini_;
+	ini_.SetPath(GetClientCfgPath());
 	ini_.DeleteAllSections();//清空所有的数据
 	//写入新的数据
 	// 如果不清空会导致写入的Action?序号错乱
 	int count_operation = 0, count_unoperation = 0;
-	for (vector<Action>::iterator it = actions_.begin();
-		it != actions_.end(); ++it)
+	for (vector<Action>::iterator it = the_actions.begin();
+		it != the_actions.end(); ++it)
 	{
 		if (it->Isoperation())
 		{
@@ -1519,6 +1423,7 @@ void CBm::WriteIni()
 	AddActionToIni(count_operation, endaction);
 	endaction.Isoperation(false);
 	AddActionToIni(count_unoperation, endaction);
+	return true;
 }
 
 bool CBm::DelMonitorAction(CString strJson, CString &strResult)
@@ -1527,7 +1432,7 @@ bool CBm::DelMonitorAction(CString strJson, CString &strResult)
 	Json::Value root;
 	vector<Action> error_actions;	//错误列表
 	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
-	RefreshAllActions();	//refres all actions;
+	vector<Action> val = ReadIni();
 	if (!object.parse(jsontemp, root))
 	{
 		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
@@ -1547,13 +1452,13 @@ bool CBm::DelMonitorAction(CString strJson, CString &strResult)
 		tempstr = CA2W(action_param2.c_str());
 		temp.param2(tempstr);
 		temp.Isoperation(addlist[i]["IsOperation"].asBool());
-		if(!DelActionToVector(temp))	//如果已存在则放入错误列表
+		if(!DelActionToVector(temp, val))	//如果已存在则放入错误列表
 			error_actions.push_back(temp);
 	}
-	WriteIni();
+	WriteIni(val);
 	if (error_actions.empty())
 	{
-		strResult = GetJsonStringByType(kAllAction, action_type);
+		strResult = GetJsonStringByType(action_type, val, L"ListForType");
 	}
 	else
 	{
@@ -1562,16 +1467,16 @@ bool CBm::DelMonitorAction(CString strJson, CString &strResult)
 	return true;
 }
 
-bool CBm::DelActionToVector(const Action &add_action)
+bool CBm::DelActionToVector(const Action &add_action, vector<Action> &the_actions)
 {
-	vector<Action>::iterator findit = std::find(actions_.begin(), actions_.end(), add_action);
-	if (findit == actions_.end())
+	vector<Action>::iterator findit = std::find(the_actions.begin(), the_actions.end(), add_action);
+	if (findit == the_actions.end())
 	{
 		return false;
 	}
 	else
 	{
-		actions_.erase(findit);
+		the_actions.erase(findit);
 		return true;
 	}
 }
@@ -1580,8 +1485,9 @@ bool CBm::ChageMonitorAction(CString strJson, CString &strResult)
 {
 	Json::Reader object;
 	Json::Value root;
+
 	string jsontemp = CW2A(strJson.GetBuffer());	//unicode to ansi.jsoncpp only support ansi
-	RefreshAllActions();	//refres all actions;
+	vector<Action> val = ReadIni();
 	if (!object.parse(jsontemp, root))
 	{
 		WRITE_LOG(LOG_LEVEL_ERROR, L"json解析错误!");
@@ -1592,13 +1498,13 @@ bool CBm::ChageMonitorAction(CString strJson, CString &strResult)
 	Json::Value changed = root["New"];
 	Action old_action = JsonToAction(old);
 	Action new_action = JsonToAction(changed);
-	int err = ChangeActionToVector(old_action, new_action);
+	int err = ChangeActionToVector(old_action, new_action, val);
 	switch(err)
 	{
 	case 0:	//成功
 		{
-			WriteIni();
-			strResult = GetJsonStringByType(kAllAction, new_action.type());
+			WriteIni(val);
+			strResult = GetJsonStringByType(new_action.type(), val, L"ListForType");
 		}
 		break;
 	case 1:	//未找到old
@@ -1633,24 +1539,115 @@ Action CBm::JsonToAction(const Json::Value root)
 	return ret;
 }
 
-int CBm::ChangeActionToVector(const Action &old_action, const Action &new_action)
+int CBm::ChangeActionToVector(const Action &old_action, const Action &new_action, vector<Action> &the_actions)
 {
-	vector<Action>::iterator findit = find(actions_.begin(), actions_.end(), old_action);
-	if (findit == actions_.end())	//未找到
+	vector<Action>::iterator findit = find(the_actions.begin(), the_actions.end(), old_action);
+	if (findit == the_actions.end())	//未找到需要替换的action
 	{
 		return 1;
 	}
 	else
 	{
-		vector<Action>::iterator temp = find(actions_.begin(), actions_.end(), new_action);
-		if (temp == actions_.end())
+		vector<Action>::iterator temp = find(the_actions.begin(), the_actions.end(), new_action);
+		if (temp == the_actions.end())//未找到替换的内容,替换
 		{
 			*findit = new_action;
 			return 0;
 		}
-		else
+		else	//需要替换的内容以存在
 			return 2;
 	}
+}
+
+std::vector<Action> CBm::ReadIni()
+{
+	vector<Action> ret;
+	CIniFile ini_;
+	ini_.SetPath(GetClientCfgPath());
+	if (ini_.SectionExist(kOperationSectionName))	//检测指定段是否存在
+	{
+		CStringArray keys, values;
+		int key_number = ini_.GetAllKeysAndValues(kOperationSectionName, keys, values);
+		Action endaction(88,L"",L"", true);
+		if (key_number < 4)
+		{
+			ini_.DeleteAllSections();
+			AddActionToIni(0, endaction);
+			endaction.Isoperation(false);
+			AddActionToIni(0, endaction);
+		}
+		else
+		{
+			bool isok = false;
+			for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
+			{
+				Action temp(
+					_wtoi(values[i]),	//actiontype
+					values[i+1],//param1
+					values[i+2],//param2
+					true//isoperation
+					);
+				if (temp == endaction)
+				{
+					isok = true;
+				}
+				else
+					ret.push_back(temp);
+			}
+			//判断最后一个key是否为配置结束
+			if (!isok)
+			{
+				//在配置文件中加入
+				AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
+			}
+		}
+		
+	}
+
+	if (ini_.SectionExist(kUnOperationSectionName))
+	{
+		CStringArray keys, values;
+		int key_number = ini_.GetAllKeysAndValues(kUnOperationSectionName, keys, values);
+	
+		bool isok = false;
+		Action endaction(88,L"",L"", false);
+		if (key_number < 4)
+		{
+			ini_.DeleteAllSections();
+			AddActionToIni(0, endaction);
+			endaction.Isoperation(true);
+			AddActionToIni(0, endaction);
+		}
+		else
+		{
+			for (int i = 0; i < key_number; i+=4)//每个action都对应4个值
+			{
+				Action temp(
+					_wtoi(values[i]),	//actiontype
+					values[i+1],//param1
+					values[i+2],//param2
+					false//isoperation
+					);
+				if (temp == endaction)
+				{
+					isok = true;
+				}
+				else
+				{
+					ret.push_back(temp);
+				}
+			}
+			//判断最后一个key是否为配置结束
+			if (!isok)
+			{
+				//在配置文件中加入
+				AddActionToIni(key_number/4, endaction);	//the value "key_number" is all keys number.need / 4
+			}
+		}
+		
+	}
+
+	return ret;
 }
 
 

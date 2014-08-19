@@ -26,14 +26,7 @@ public:
 		return (this->type() == other.type() &&  this->param1() == other.param1() 
 			&& this->param2() == other.param2() /*&& this->Isoperation() == other.Isoperation()*/);
 	}
-	Action& operator =(const Action &other)
-	{
-		this->param1_ = other.param1();
-		this->param2_ = other.param2();
-		this->type_ = other.type();
-		this->isoperation_ = other.Isoperation();
-		return *this;
-	}
+
 	//set  get
 	const int type() const { return type_; }
 	void type(const int typein){ type_ = typein; }

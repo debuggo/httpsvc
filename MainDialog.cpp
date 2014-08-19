@@ -421,7 +421,8 @@ BOOL CMainDialog::CreateMainDialog( HINSTANCE hInstance, int bIsShow )
 			WRITE_LOG(LOG_LEVEL_FATAL, _T("发现互斥体,但未找到窗口句柄! ErrorCode : 0x%08X"), GetLastError());
 			ExitProcess(0);
 		}
-		ShowWindow(m_hWnd, SW_SHOW);
+		if(bIsShow == 1)
+			ShowWindow(m_hWnd, SW_SHOW);
 		ExitProcess(0);
 	}
 	//创建窗口
